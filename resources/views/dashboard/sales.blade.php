@@ -1,63 +1,20 @@
 @extends('layouts.app')
-
 @section('title', 'Dashboard Sales')
-
-@section('header', 'Dashboard Sales')
-
+@section('header', 'Halaman Utama')
 @section('content')
-
-<div class="mb-8">
-    <h1 class="text-2xl font-bold text-gray-900">
-        Selamat datang, {{ auth()->user()->nama_user }}
-    </h1>
-
-    <p class="text-gray-500 mt-1">
-        Kelola pelanggan dan order penjualan Anda.
-    </p>
+<x-ui.page-header title="Dashboard Sales" subtitle="Ringkasan seluruh order yang Anda catat dan status pemrosesannya.">
+    <x-slot:actions><x-ui.button :href="route('order.create')"><x-ui.icon name="plus" /> Tambah Order</x-ui.button></x-slot:actions>
+</x-ui.page-header>
+<div class="ui-stat-grid">
+    <x-ui.stat-card label="Total Order" :value="number_format($totalOrder, 0, ',', '.')" icon="receipt" description="Seluruh order Anda" />
+    <x-ui.stat-card label="Menunggu Validasi" :value="number_format($orderMenunggu, 0, ',', '.')" tone="warning" icon="clock" description="Menunggu pemeriksaan Admin" />
+    <x-ui.stat-card label="Dikirim" :value="number_format($orderDikirim, 0, ',', '.')" tone="info" icon="box" description="Order berstatus dikirim" />
+    <x-ui.stat-card label="Selesai" :value="number_format($orderSelesai, 0, ',', '.')" tone="success" icon="check" description="Order yang telah selesai" />
 </div>
-
-<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
-
-    <div class="bg-white border border-gray-200 rounded-xl p-6">
-        <p class="text-sm text-gray-500">
-            Total Order
-        </p>
-
-        <p class="text-3xl font-bold mt-3">
-            {{ $totalOrder }}
-        </p>
-    </div>
-
-    <div class="bg-white border border-gray-200 rounded-xl p-6">
-        <p class="text-sm text-gray-500">
-            Menunggu Validasi
-        </p>
-
-        <p class="text-3xl font-bold mt-3">
-            {{ $orderMenunggu }}
-        </p>
-    </div>
-
-    <div class="bg-white border border-gray-200 rounded-xl p-6">
-        <p class="text-sm text-gray-500">
-            Dikirim
-        </p>
-
-        <p class="text-3xl font-bold mt-3">
-            {{ $orderDikirim }}
-        </p>
-    </div>
-
-    <div class="bg-white border border-gray-200 rounded-xl p-6">
-        <p class="text-sm text-gray-500">
-            Selesai
-        </p>
-
-        <p class="text-3xl font-bold mt-3">
-            {{ $orderSelesai }}
-        </p>
-    </div>
-
+<div class="dashboard-section">
+    <x-ui.card title="Kelola Order Anda">
+        <p class="page-subtitle mt-0">Periksa detail order atau ubah order yang masih menunggu validasi.</p>
+        <div class="page-actions mt-6"><x-ui.button :href="route('order.index')" variant="secondary">Lihat Order</x-ui.button><x-ui.button :href="route('pelanggan.index')" variant="ghost">Data Pelanggan</x-ui.button></div>
+    </x-ui.card>
 </div>
-
 @endsection

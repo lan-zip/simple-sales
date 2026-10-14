@@ -1,213 +1,35 @@
 @extends('layouts.app')
-
 @section('title', 'Data Produk')
-
 @section('header', 'Data Produk')
-
 @section('content')
+<x-ui.page-header title="Data Produk" subtitle="Kelola katalog produk, harga, stok, dan status ketersediaan.">
+    <x-slot:actions><x-ui.button :href="route('produk.create')"><x-ui.icon name="plus" /> Tambah Produk</x-ui.button></x-slot:actions>
+</x-ui.page-header>
+<x-ui.validation-summary />
+<x-ui.data-table caption="Daftar Produk">
+    <x-slot:toolbar><x-ui.search-toolbar :action="route('produk.index')" :value="$cari" label="Cari Produk" placeholder="Cari kode, nama, atau kategori produk…" /></x-slot:toolbar>
+    <thead><tr><th scope="col">No.</th><th scope="col">Produk</th><th scope="col">Kategori</th><th scope="col" class="numeric">Harga</th><th scope="col" class="numeric">Stok / Satuan</th><th scope="col">Status</th><th scope="col" class="numeric">Aksi</th></tr></thead>
+    <tbody>
+        @forelse($produk as $item)
+            <tr>
+                <td>{{ $produk->firstItem() + $loop->index }}</td>
+                <td class="cell-copy"><p class="font-medium">{{ $item->nama_produk }}</p><p class="cell-meta">{{ $item->kode_produk }}</p></td>
+<td>{{ $item->kategori_produk }}</td>
+<td class="numeric"><x-ui.money :value="$item->harga_produk" /></td>
+<td class="numeric">{{ number_format($item->stok_produk, 0, ',', '.') }} <span class="cell-meta">{{ $item->satuan_produk }}</span></td>
+<td><x-ui.badge :status="$item->status_produk" /></td>
+                <td><div class="table-actions">
+                    <x-ui.button :href="route('produk.edit', $item)" variant="secondary" :aria-label="'Ubah Produk '.$item->nama_produk">Ubah</x-ui.button>
+                    @if($item->status_produk === 'aktif')
+                        <x-ui.record-action :action="route('produk.nonaktifkan', $item)" :message="'Nonaktifkan Produk '.$item->nama_produk.'?'" label="Nonaktifkan" />
 
-<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-
-    <div>
-        <h1 class="text-2xl font-bold text-gray-900">
-            Data Produk
-        </h1>
-
-        <p class="text-gray-500 mt-1">
-            Kelola data produk yang tersedia.
-        </p>
-    </div>
-
-    <a
-        href="{{ route('produk.create') }}"
-        class="bg-slate-900 text-white px-5 py-2.5 rounded-lg hover:bg-slate-800 text-center"
-    >
-        Tambah Produk
-    </a>
-
-</div>
-
-@if(session('success'))
-
-    <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-5">
-        {{ session('success') }}
-    </div>
-
-@endif
-
-<div class="bg-white border border-gray-200 rounded-xl">
-
-    <div class="p-5 border-b border-gray-200">
-
-        <form
-            action="{{ route('produk.index') }}"
-            method="GET"
-            class="flex flex-col sm:flex-row gap-3"
-        >
-
-            <input
-                type="text"
-                name="cari"
-                value="{{ $cari }}"
-                placeholder="Cari kode, nama, atau kategori produk..."
-                class="flex-1 border border-gray-300 rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-slate-900"
-            >
-
-            <button
-                type="submit"
-                class="bg-slate-900 text-white px-5 py-2.5 rounded-lg"
-            >
-                Cari
-            </button>
-
-            @if($cari)
-
-                <a
-                    href="{{ route('produk.index') }}"
-                    class="bg-gray-100 px-5 py-2.5 rounded-lg text-center"
-                >
-                    Reset
-                </a>
-
-            @endif
-
-        </form>
-
-    </div>
-
-    <div class="overflow-x-auto">
-
-        <table class="w-full text-sm">
-
-            <thead class="bg-gray-50 text-gray-600">
-
-                <tr>
-                    <th class="text-left px-5 py-4">No</th>
-                    <th class="text-left px-5 py-4">Kode</th>
-                    <th class="text-left px-5 py-4">Nama Produk</th>
-                    <th class="text-left px-5 py-4">Kategori</th>
-                    <th class="text-left px-5 py-4">Harga</th>
-                    <th class="text-left px-5 py-4">Stok</th>
-                    <th class="text-left px-5 py-4">Status</th>
-                    <th class="text-left px-5 py-4">Aksi</th>
-                </tr>
-
-            </thead>
-
-            <tbody class="divide-y divide-gray-100">
-
-                @forelse($produk as $item)
-
-                    <tr class="hover:bg-gray-50">
-
-                        <td class="px-5 py-4">
-                            {{ $produk->firstItem() + $loop->index }}
-                        </td>
-
-                        <td class="px-5 py-4">
-                            {{ $item->kode_produk }}
-                        </td>
-
-                        <td class="px-5 py-4 font-medium">
-                            {{ $item->nama_produk }}
-                        </td>
-
-                        <td class="px-5 py-4">
-                            {{ $item->kategori_produk }}
-                        </td>
-
-                        <td class="px-5 py-4">
-                            Rp {{ number_format($item->harga_produk, 0, ',', '.') }}
-                        </td>
-
-                        <td class="px-5 py-4">
-                            {{ $item->stok_produk }} {{ $item->satuan_produk }}
-                        </td>
-
-                        <td class="px-5 py-4">
-
-                            @if($item->status_produk === 'aktif')
-
-                                <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs">
-                                    Aktif
-                                </span>
-
-                            @else
-
-                                <span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs">
-                                    Nonaktif
-                                </span>
-
-                            @endif
-
-                        </td>
-
-                        <td class="px-5 py-4">
-
-                            <div class="flex gap-2">
-
-                                <a
-                                    href="{{ route('produk.edit', $item) }}"
-                                    class="bg-amber-100 text-amber-700 px-3 py-2 rounded-lg"
-                                >
-                                    Ubah
-                                </a>
-
-                                @if($item->status_produk === 'aktif')
-
-                                    <form
-                                        action="{{ route('produk.nonaktifkan', $item) }}"
-                                        method="POST"
-                                        onsubmit="return confirm('Nonaktifkan produk ini?')"
-                                    >
-
-                                        @csrf
-                                        @method('PATCH')
-
-                                        <button
-                                            type="submit"
-                                            class="bg-red-100 text-red-700 px-3 py-2 rounded-lg"
-                                        >
-                                            Nonaktifkan
-                                        </button>
-
-                                    </form>
-
-                                @endif
-
-                            </div>
-
-                        </td>
-
-                    </tr>
-
-                @empty
-
-                    <tr>
-                        <td
-                            colspan="8"
-                            class="text-center text-gray-500 px-5 py-10"
-                        >
-                            Data produk belum tersedia.
-                        </td>
-                    </tr>
-
-                @endforelse
-
-            </tbody>
-
-        </table>
-
-    </div>
-
-    @if($produk->hasPages())
-
-        <div class="p-5 border-t border-gray-200">
-            {{ $produk->links() }}
-        </div>
-
-    @endif
-
-</div>
-
+                    @endif
+                </div></td>
+            </tr>
+        @empty
+            <x-ui.list-empty colspan="7" :filtered="(bool) $cari" title="Belum Ada Data Produk" description="Tambahkan data Produk untuk mulai digunakan dalam pencatatan penjualan." :create="route('produk.create')" create-label="Tambah Produk" :reset="route('produk.index')" />
+        @endforelse
+    </tbody>
+    <x-slot:pagination><x-ui.pagination :paginator="$produk" /></x-slot:pagination>
+</x-ui.data-table>
 @endsection

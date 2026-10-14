@@ -31,11 +31,24 @@ class DashboardController extends Controller
                 'menunggu_validasi'
             )->count();
 
+            $totalPendapatan = Penjualan::where('status_penjualan', 'selesai')
+                ->sum('total_penjualan');
+
+            $orderTerbaru = Penjualan::with([
+                'pelanggan:id_pelanggan,nama_pelanggan,nama_toko',
+                'user:id_user,nama_user',
+            ])
+                ->orderByDesc('id_penjualan')
+                ->limit(5)
+                ->get();
+
             return view('dashboard.admin', compact(
                 'totalProduk',
                 'totalSales',
                 'totalPelanggan',
-                'transaksiMenunggu'
+                'transaksiMenunggu',
+                'totalPendapatan',
+                'orderTerbaru'
             ));
         }
 

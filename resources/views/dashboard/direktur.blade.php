@@ -1,63 +1,13 @@
 @extends('layouts.app')
-
 @section('title', 'Dashboard Direktur')
-
-@section('header', 'Dashboard Direktur')
-
+@section('header', 'Halaman Utama')
 @section('content')
-
-<div class="mb-8">
-    <h1 class="text-2xl font-bold text-gray-900">
-        Selamat datang, {{ auth()->user()->nama_user }}
-    </h1>
-
-    <p class="text-gray-500 mt-1">
-        Pantau penjualan dan kondisi stok perusahaan.
-    </p>
+<x-ui.page-header title="Dashboard Direktur" subtitle="Pantau penjualan yang telah selesai dan kondisi stok produk aktif." />
+<div class="ui-stat-grid">
+    <x-ui.stat-card label="Total Pendapatan" :value="'Rp '.number_format($totalPenjualan, (float) $totalPenjualan == round((float) $totalPenjualan) ? 0 : 2, ',', '.')" tone="success" icon="money" description="Transaksi selesai · seluruh periode" />
+    <x-ui.stat-card label="Transaksi Selesai" :value="number_format($totalTransaksi, 0, ',', '.')" icon="receipt" description="Seluruh periode" />
+    <x-ui.stat-card label="Produk Aktif" :value="number_format($totalProduk, 0, ',', '.')" tone="info" icon="box" description="Produk dalam katalog aktif" />
+    <x-ui.stat-card label="Stok Rendah" :value="number_format($stokRendah, 0, ',', '.')" tone="warning" icon="warning" description="Produk aktif dengan stok ≤ 10" />
 </div>
-
-<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
-
-    <div class="bg-white border border-gray-200 rounded-xl p-6">
-        <p class="text-sm text-gray-500">
-            Total Penjualan
-        </p>
-
-        <p class="text-2xl font-bold mt-3">
-            Rp {{ number_format($totalPenjualan, 0, ',', '.') }}
-        </p>
-    </div>
-
-    <div class="bg-white border border-gray-200 rounded-xl p-6">
-        <p class="text-sm text-gray-500">
-            Transaksi Selesai
-        </p>
-
-        <p class="text-3xl font-bold mt-3">
-            {{ $totalTransaksi }}
-        </p>
-    </div>
-
-    <div class="bg-white border border-gray-200 rounded-xl p-6">
-        <p class="text-sm text-gray-500">
-            Produk Aktif
-        </p>
-
-        <p class="text-3xl font-bold mt-3">
-            {{ $totalProduk }}
-        </p>
-    </div>
-
-    <div class="bg-white border border-gray-200 rounded-xl p-6">
-        <p class="text-sm text-gray-500">
-            Stok Rendah
-        </p>
-
-        <p class="text-3xl font-bold mt-3">
-            {{ $stokRendah }}
-        </p>
-    </div>
-
-</div>
-
+<div class="dashboard-section"><x-ui.card title="Tentang Ringkasan Ini"><p class="page-subtitle mt-0">Pendapatan hanya menghitung transaksi berstatus Selesai. Jumlah stok rendah mengikuti satuan masing-masing produk.</p></x-ui.card></div>
 @endsection
