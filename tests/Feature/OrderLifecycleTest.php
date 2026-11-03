@@ -170,6 +170,7 @@ class OrderLifecycleTest extends TestCase
         $this->actingAs($this->salesA);
         $orderData = [
             'id_pelanggan' => $this->customer->getKey(),
+            'foto_toko' => UploadedFile::fake()->image('foto_toko.jpg'),
             'produk' => [
                 ['id_produk' => $this->product->getKey(), 'jumlah' => 2],
             ],

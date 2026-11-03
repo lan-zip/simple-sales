@@ -26,6 +26,7 @@ class RedesignUiTest extends TestCase
         $this->assertSame(':memory:', DB::connection()->getConfig('database'));
         Http::preventStrayRequests();
         Http::fake(['api.fonnte.com/*' => Http::response(['status' => true])]);
+        \Illuminate\Support\Facades\Storage::fake('public');
         // Explicit test schema; never run production migrations or seeders.
         Schema::create('user', function (Blueprint $t) {
             $t->id('id_user');
@@ -181,7 +182,7 @@ class RedesignUiTest extends TestCase
 
     public function test_order_and_validation_flow_uses_memory_database_and_fake_whatsapp(): void
     {
-        $data = ['id_pelanggan'=>$this->customer->getKey(),'produk'=>[['id_produk'=>$this->product->getKey(),'jumlah'=>2]]];
+        $data = ['id_pelanggan'=>$this->customer->getKey(),'foto_toko'=>\Illuminate\Http\UploadedFile::fake()->image('toko.jpg'),'produk'=>[['id_produk'=>$this->product->getKey(),'jumlah'=>2]]];
         $this->actingAs($this->sales)->post('/order',$data)->assertRedirect(route('order.index'));
         $order = Penjualan::firstOrFail();
         $this->assertSame('25000.50',$order->total_penjualan);
