@@ -152,9 +152,10 @@ class OrderController extends Controller
     );
 
     $order->load([
-        'pelanggan',
-        'detailPenjualan.produk'
-    ]);
+    'pelanggan',
+    'user',
+    'detailPenjualan.produk',
+]);
 
     return view('order.show', compact('order'));
 }

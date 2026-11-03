@@ -283,7 +283,7 @@
 }
 @media print {
     @page { margin: 16mm; }
-    .app-sidebar, .app-topbar, .skip-link, .no-print, dialog, .ui-alert { display: none !important; }
+    .app-sidebar, .app-topbar, .page-header, .skip-link, .no-print, dialog, .ui-alert { display: none !important; }
     .app-shell, .app-workspace, .app-content { display: block !important; height: auto !important; min-height: 0 !important; overflow: visible !important; margin: 0 !important; padding: 0 !important; }
     .print-brand { display: block; margin-bottom: 16px; }
     .ui-card { box-shadow: none; }
