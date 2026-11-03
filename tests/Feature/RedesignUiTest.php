@@ -191,7 +191,7 @@ class RedesignUiTest extends TestCase
         $this->assertSame(3,$order->detailPenjualan()->first()->jumlah_produk);
         $this->actingAs($this->user('sales'))->get('/order/'.$order->getKey())->assertForbidden();
         $this->actingAs($this->admin)->patch('/transaksi/'.$order->getKey().'/validasi')->assertRedirect(route('transaksi.show',$order));
-        $this->assertSame('tervalidasi',$order->fresh()->status_penjualan);
+        $this->assertSame(\App\Enums\OrderStatus::DIPROSES,$order->fresh()->status_penjualan);
         $this->assertSame(17,$this->product->fresh()->stok_produk);
         Http::assertSentCount(1);
         $this->patch('/transaksi/'.$order->getKey().'/validasi')->assertSessionHasErrors('transaksi');
