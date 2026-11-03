@@ -2,7 +2,7 @@
 @section('title', 'Detail Order')
 @section('header', 'Order Penjualan')
 @section('content')
-<x-ui.page-header title="Detail Order" :subtitle="'Rincian pesanan '.$order->nomor_penjualan.'.'">
+<x-ui.page-header title="Detail Order" :subtitle="'Rincian pesanan '.$order->nomor_penjualan.'.'" class="no-print">
     <x-slot:badge><x-ui.badge :status="$order->status_penjualan" /></x-slot:badge>
     <x-slot:actions>
         <div class="page-actions no-print">
@@ -10,13 +10,13 @@
             @if($order->isDikirim() && $order->foto_bukti_penyerahan)
                 <x-ui.record-action :action="route('order.selesai', $order)" message="Selesaikan order ini? Status akan diperbarui menjadi selesai dan transaksi dianggap tuntas." label="Selesaikan Order" variant="primary" />
             @endif
-            <x-ui.button data-print>Cetak Nota</x-ui.button>
+            @if($order->canPrintNota())<x-ui.button data-print>Cetak Nota</x-ui.button>@endif
         </div>
     </x-slot:actions>
 </x-ui.page-header>
 
 @if($order->isDikirim())
-    <div class="mb-6">
+    <div class="mb-6 no-print">
         <x-ui.card title="Unggah Bukti Penyerahan">
             <p class="ui-field-hint mb-4">
                 Pesanan sedang dalam tahap pengiriman. Unggah foto penyerahan pesanan kepada customer sebelum menyelesaikan order.

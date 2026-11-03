@@ -2,7 +2,7 @@
 
 ## Digitalisasi Workflow dengan Fitur Integrasi Input Sales dan Admin pada PT. Halus Ciptanadi
 
-**Versi:** 0.1  
+**Versi:** 0.2  
 **Status:** Working Product Baseline  
 **Repository:** `lan-zip/simple-sales`  
 **Branch Development:** `dev`
@@ -392,6 +392,8 @@ Setelah selesai:
 
 Sistem dapat menghasilkan nota digital berdasarkan data transaksi yang tersimpan.
 
+Untuk MVP, nota digital menggunakan **browser-print HTML** sebagai output customer-facing. PDF atau file download khusus belum menjadi requirement MVP.
+
 Nota minimal menampilkan:
 
 - Nomor transaksi.
@@ -401,16 +403,28 @@ Nota minimal menampilkan:
 - Detail produk.
 - Jumlah.
 - Harga.
+- Subtotal.
 - Total transaksi.
 - Status transaksi.
+
+Ketentuan print:
+
+- Tombol **Cetak Nota** tersedia untuk transaksi berstatus `diproses`, `dikirim`, atau `selesai`.
+- Tombol **Cetak Nota** tidak tersedia ketika transaksi masih `menunggu_validasi`.
+- Layout print harus customer-facing dan tidak menampilkan navigation, form/action internal, foto toko, atau foto bukti penyerahan.
+- Setelah transaksi mencapai `selesai`, nota customer-facing dianggap final dan order tidak dapat diedit lagi.
 
 ### FR-14 — WhatsApp Note
 
 Nota digital dapat dikirim kepada customer melalui WhatsApp menggunakan layanan pihak ketiga.
 
+Untuk MVP, WhatsApp tetap menggunakan **pesan teks**. Pengiriman file/PDF sebagai attachment bukan requirement Issue #4.
+
 Nomor WhatsApp customer harus mempunyai satu sumber data yang konsisten.
 
 Sistem tidak boleh mengandalkan field nomor WhatsApp yang berbeda-beda tanpa aturan source of truth yang jelas.
+
+Trigger pengiriman WhatsApp masih merupakan Open Question sampai keputusan produk ditetapkan.
 
 ### FR-15 — Sales Report
 
@@ -513,6 +527,26 @@ Pengiriman WhatsApp harus menggunakan nomor customer yang berasal dari sumber da
 ### BR-10
 
 Transaksi yang selesai menjadi data yang dapat digunakan untuk kebutuhan laporan.
+
+### BR-11
+
+Nota customer-facing hanya dapat dicetak untuk transaksi berstatus `diproses`, `dikirim`, atau `selesai`.
+
+### BR-12
+
+Foto toko dan foto bukti penyerahan merupakan dokumentasi operasional dan tidak ditampilkan pada output nota customer-facing.
+
+### BR-13
+
+Untuk MVP, output nota digital adalah browser-print HTML. PDF atau file download khusus tidak diwajibkan.
+
+### BR-14
+
+WhatsApp tetap menggunakan pesan teks pada MVP. Attachment file/PDF bukan requirement Issue #4.
+
+### BR-15
+
+Setelah transaksi mencapai `selesai`, order dan nota customer-facing dianggap final dan order tidak dapat diedit.
 
 ---
 
@@ -686,9 +720,37 @@ Project dianggap **Done** apabila seluruh kondisi berikut terpenuhi:
 
 ---
 
-## 14. Open Questions
+## 14. Resolved Product Decisions
 
-Requirement berikut tidak boleh ditebak oleh developer atau AI agent tanpa keputusan produk:
+Keputusan berikut sudah ditetapkan dan menjadi requirement produk yang dapat digunakan developer/AI agent.
+
+### OQ-03 — Nota Digital
+
+**Resolved:** Untuk MVP, nota digital cukup berupa **browser-print HTML**. PDF atau file download khusus belum diwajibkan.
+
+### OQ-05 — Ketersediaan Cetak Nota
+
+**Resolved:** Tombol **Cetak Nota** tersedia ketika transaksi berstatus:
+
+- `diproses`
+- `dikirim`
+- `selesai`
+
+Tidak tersedia pada `menunggu_validasi`.
+
+### OQ-06 — Immutability Nota
+
+**Resolved:** Setelah order mencapai `selesai`, nota customer-facing dianggap final dan order tidak dapat diedit.
+
+### OQ-07 — WhatsApp Attachment
+
+**Resolved:** MVP tetap menggunakan pesan WhatsApp berbasis teks. PDF/file attachment tidak termasuk scope Issue #4.
+
+---
+
+## 15. Open Questions
+
+Requirement berikut masih membutuhkan keputusan produk dan tidak boleh ditebak oleh developer atau AI agent:
 
 ### OQ-01 — Permission Customer
 
@@ -709,10 +771,6 @@ Apakah WhatsApp note:
 - otomatis setelah transaksi selesai,
 - manual melalui tombol,
 - atau kombinasi otomatis + manual?
-
-### OQ-03 — Nota Final
-
-Apakah "nota digital" cukup berupa printable HTML/browser print, atau wajib menghasilkan file/download tertentu?
 
 ### OQ-04 — Report Filter
 

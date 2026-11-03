@@ -78,14 +78,19 @@ class Penjualan extends Model
         return $this->status_penjualan === OrderStatus::SELESAI || $this->status_penjualan === 'selesai';
     }
 
+    public function canPrintNota(): bool
+    {
+        return $this->isDiproses() || $this->isDikirim() || $this->isSelesai();
+    }
+
     public function canTransitionTo(OrderStatus $target): bool
     {
         $current = $this->status_penjualan;
-        if (!$current instanceof OrderStatus) {
+        if (! $current instanceof OrderStatus) {
             $current = OrderStatus::fromLegacy($current);
         }
 
-        if (!$current) {
+        if (! $current) {
             return false;
         }
 

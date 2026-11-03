@@ -5,7 +5,7 @@
         <dl class="detail-grid">
             <div><dt>Nomor {{ $isAdmin ? 'Transaksi' : 'Order' }}</dt><dd>{{ $sale->nomor_penjualan }}</dd></div>
             <div><dt>Tanggal Order</dt><dd>{{ $sale->tanggal_penjualan?->locale('id')->translatedFormat('d F Y') }}</dd></div>
-            @if($isAdmin)<div><dt>Sales</dt><dd>{{ $sale->user?->nama_user ?? 'Sales tidak tersedia' }}</dd></div>@endif
+            <div><dt>Sales</dt><dd>{{ $sale->user?->nama_user ?? 'Sales tidak tersedia' }}</dd></div>
             <div><dt>Status</dt><dd><x-ui.badge :status="$sale->status_penjualan" /></dd></div>
             @if($sale->tanggal_validasi)<div><dt>Tanggal Validasi</dt><dd>{{ $sale->tanggal_validasi?->locale('id')->translatedFormat('d F Y') }}</dd></div>@endif
             @if($sale->tanggal_selesai)<div><dt>Tanggal Selesai</dt><dd>{{ $sale->tanggal_selesai?->locale('id')->translatedFormat('d F Y') }}</dd></div>@endif
@@ -32,7 +32,7 @@
         <tfoot><tr><th scope="row" colspan="3" class="numeric">Total Penjualan</th><td class="numeric font-bold"><x-ui.money :value="$sale->total_penjualan" /></td></tr></tfoot>
     </x-ui.data-table>
     @if($sale->foto_toko)
-        <x-ui.card title="Foto Toko">
+        <x-ui.card title="Foto Toko" class="no-print">
             <div class="space-y-3">
                 <a href="{{ asset('storage/' . $sale->foto_toko) }}" target="_blank" rel="noopener noreferrer" class="inline-block" aria-label="Lihat foto toko ukuran penuh">
                     <img src="{{ asset('storage/' . $sale->foto_toko) }}"
@@ -45,7 +45,7 @@
         </x-ui.card>
     @endif
     @if($sale->foto_bukti_penyerahan)
-        <x-ui.card title="Bukti Penyerahan">
+        <x-ui.card title="Bukti Penyerahan" class="no-print">
             <div class="space-y-3">
                 <a href="{{ asset('storage/' . $sale->foto_bukti_penyerahan) }}" target="_blank" rel="noopener noreferrer" class="inline-block" aria-label="Lihat foto bukti penyerahan ukuran penuh">
                     <img src="{{ asset('storage/' . $sale->foto_bukti_penyerahan) }}"
