@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\OrderStatus;
 use App\Models\Pelanggan;
 use App\Models\Produk;
 use App\Models\Penjualan;
@@ -113,7 +114,7 @@ class OrderController extends Controller
                 'nomor_penjualan' => 'PJ-' . now()->format('YmdHis') . '-' . random_int(100, 999),
                 'tanggal_penjualan' => now()->toDateString(),
                 'total_penjualan' => $total,
-                'status_penjualan' => 'menunggu_validasi',
+                'status_penjualan' => OrderStatus::MENUNGGU_VALIDASI->value,
             ]);
 
             foreach ($detailData as $detail) {
@@ -156,7 +157,7 @@ public function edit(Penjualan $order)
     );
 
     abort_if(
-        $order->status_penjualan !== 'menunggu_validasi',
+        !$order->isMenungguValidasi(),
         403,
         'Order yang sudah diproses tidak dapat diubah.'
     );
@@ -206,7 +207,7 @@ public function update(Request $request, Penjualan $order)
     );
 
     abort_if(
-        $order->status_penjualan !== 'menunggu_validasi',
+        !$order->isMenungguValidasi(),
         403,
         'Order yang sudah diproses tidak dapat diubah.'
     );
@@ -290,5 +291,62 @@ public function update(Request $request, Penjualan $order)
     return redirect()
         ->route('order.index')
         ->with('success', 'Order berhasil diubah.');
+}
+
+public function uploadBukti(Request $request, Penjualan $order)
+{
+    abort_if(
+        $order->id_user !== auth()->user()->id_user,
+        403
+    );
+
+    if (!$order->isDikirim()) {
+        throw ValidationException::withMessages([
+            'order' => 'Bukti penyerahan hanya dapat diunggah saat order berstatus dikirim.'
+        ]);
+    }
+
+    $request->validate([
+        'foto_bukti_penyerahan' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
+    ]);
+
+    $path = $request->file('foto_bukti_penyerahan')->store('bukti_penyerahan', 'public');
+
+    $order->update([
+        'foto_bukti_penyerahan' => $path,
+    ]);
+
+    return redirect()
+        ->route('order.show', $order)
+        ->with('success', 'Foto bukti penyerahan berhasil diunggah.');
+}
+
+public function selesai(Penjualan $order)
+{
+    abort_if(
+        $order->id_user !== auth()->user()->id_user,
+        403
+    );
+
+    if (!$order->canTransitionTo(OrderStatus::SELESAI)) {
+        throw ValidationException::withMessages([
+            'order' => 'Order tidak dapat diselesaikan pada status saat ini.'
+        ]);
+    }
+
+    if (empty($order->foto_bukti_penyerahan)) {
+        throw ValidationException::withMessages([
+            'foto_bukti_penyerahan' => 'Order tidak dapat diselesaikan karena bukti penyerahan belum diunggah.'
+        ]);
+    }
+
+    $order->update([
+        'status_penjualan' => OrderStatus::SELESAI->value,
+        'tanggal_selesai' => now()->toDateString(),
+    ]);
+
+    return redirect()
+        ->route('order.show', $order)
+        ->with('success', 'Order berhasil diselesaikan.');
 }
 }

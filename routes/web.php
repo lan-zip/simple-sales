@@ -116,6 +116,9 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::patch('/transaksi/{transaksi}/validasi', [TransaksiController::class, 'validasi'])
         ->name('transaksi.validasi');
 
+    Route::patch('/transaksi/{transaksi}/kirim', [TransaksiController::class, 'kirim'])
+        ->name('transaksi.kirim');
+
 
     // SALES
 
@@ -209,6 +212,12 @@ Route::middleware(['auth', 'role:sales'])->group(function () {
 
     Route::post('/order', [OrderController::class, 'store'])
         ->name('order.store');
+
+    Route::post('/order/{order}/upload-bukti', [OrderController::class, 'uploadBukti'])
+        ->name('order.uploadBukti');
+
+    Route::patch('/order/{order}/selesai', [OrderController::class, 'selesai'])
+        ->name('order.selesai');
 
 });
 

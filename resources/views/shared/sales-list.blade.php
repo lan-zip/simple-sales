@@ -4,10 +4,10 @@
             @if($isAdmin)
                 <x-ui.select name="status" label="Status Transaksi" id="filter-status">
                     <option value="">Semua Status</option>
-                    @foreach(['menunggu_validasi' => 'Menunggu Validasi', 'tervalidasi' => 'Tervalidasi', 'diproses' => 'Diproses', 'dikirim' => 'Dikirim', 'selesai' => 'Selesai'] as $value => $label)
-                        <option value="{{ $value }}" @selected($status === $value)>{{ $label }}</option>
+                    @foreach(\App\Enums\OrderStatus::cases() as $case)
+                        <option value="{{ $case->value }}" @selected($status === $case->value)>{{ $case->label() }}</option>
                     @endforeach
-                    @if($status && !in_array($status, ['menunggu_validasi', 'tervalidasi', 'diproses', 'dikirim', 'selesai'], true))
+                    @if($status && !\App\Enums\OrderStatus::tryFrom($status))
                         <option value="{{ $status }}" selected>{{ ucfirst(str_replace('_', ' ', $status)) }}</option>
                     @endif
                 </x-ui.select>
@@ -30,7 +30,7 @@
                 <td><x-ui.badge :status="$item->status_penjualan" /></td>
                 <td><div class="table-actions">
                     <x-ui.button :href="route($routePrefix.'.show', $item)" variant="secondary" :aria-label="'Detail '.$item->nomor_penjualan">Detail</x-ui.button>
-                    @if(!$isAdmin && $item->status_penjualan === 'menunggu_validasi')
+                    @if(!$isAdmin && $item->isMenungguValidasi())
                         <x-ui.button :href="route('order.edit', $item)" variant="ghost" :aria-label="'Ubah '.$item->nomor_penjualan">Ubah</x-ui.button>
                     @endif
                 </div></td>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\OrderStatus;
 use App\Models\User;
 use App\Models\Produk;
 use App\Models\Pelanggan;
@@ -28,10 +29,10 @@ class DashboardController extends Controller
 
             $transaksiMenunggu = Penjualan::where(
                 'status_penjualan',
-                'menunggu_validasi'
+                OrderStatus::MENUNGGU_VALIDASI->value
             )->count();
 
-            $totalPendapatan = Penjualan::where('status_penjualan', 'selesai')
+            $totalPendapatan = Penjualan::where('status_penjualan', OrderStatus::SELESAI->value)
                 ->sum('total_penjualan');
 
             $orderTerbaru = Penjualan::with([
@@ -63,21 +64,21 @@ class DashboardController extends Controller
                 'id_user',
                 $user->id_user
             )
-                ->where('status_penjualan', 'menunggu_validasi')
+                ->where('status_penjualan', OrderStatus::MENUNGGU_VALIDASI->value)
                 ->count();
 
             $orderDikirim = Penjualan::where(
                 'id_user',
                 $user->id_user
             )
-                ->where('status_penjualan', 'dikirim')
+                ->where('status_penjualan', OrderStatus::DIKIRIM->value)
                 ->count();
 
             $orderSelesai = Penjualan::where(
                 'id_user',
                 $user->id_user
             )
-                ->where('status_penjualan', 'selesai')
+                ->where('status_penjualan', OrderStatus::SELESAI->value)
                 ->count();
 
             return view('dashboard.sales', compact(
@@ -92,12 +93,12 @@ class DashboardController extends Controller
 
             $totalPenjualan = Penjualan::where(
                 'status_penjualan',
-                'selesai'
+                OrderStatus::SELESAI->value
             )->sum('total_penjualan');
 
             $totalTransaksi = Penjualan::where(
                 'status_penjualan',
-                'selesai'
+                OrderStatus::SELESAI->value
             )->count();
 
             $totalProduk = Produk::where(

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\OrderStatus;
 use App\Models\Penjualan;
 use Illuminate\Http\Request;
 use App\Models\Produk;
@@ -105,7 +106,7 @@ class TransaksiController extends Controller
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            if ($transaksi->status_penjualan !== 'menunggu_validasi') {
+            if (!$transaksi->canTransitionTo(OrderStatus::DIPROSES)) {
                 throw ValidationException::withMessages([
                     'transaksi' => 'Transaksi ini sudah diproses sebelumnya.'
                 ]);
@@ -137,7 +138,7 @@ class TransaksiController extends Controller
             }
 
             $transaksi->update([
-                'status_penjualan' => 'tervalidasi',
+                'status_penjualan' => OrderStatus::DIPROSES->value,
                 'tanggal_validasi' => now()->toDateString(),
             ]);
         });
@@ -236,6 +237,23 @@ class TransaksiController extends Controller
         }
     }
     
+    public function kirim(Penjualan $transaksi)
+    {
+        if (!$transaksi->canTransitionTo(OrderStatus::DIKIRIM)) {
+            throw ValidationException::withMessages([
+                'transaksi' => 'Transaksi tidak dapat diubah ke status dikirim pada status saat ini.'
+            ]);
+        }
+
+        $transaksi->update([
+            'status_penjualan' => OrderStatus::DIKIRIM->value,
+        ]);
+
+        return redirect()
+            ->route('transaksi.show', $transaksi)
+            ->with('success', 'Status transaksi berhasil diperbarui menjadi dikirim.');
+    }
+
     public function kirimNota(Penjualan $transaksi)
     {
         if ($transaksi->status_penjualan !== 'tervalidasi') {
