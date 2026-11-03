@@ -9,6 +9,7 @@ use App\Models\Penjualan;
 use App\Models\DetailPenjualan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class OrderController extends Controller
@@ -67,12 +68,16 @@ class OrderController extends Controller
     {
         $data = $request->validate([
             'id_pelanggan' => 'required|exists:pelanggan,id_pelanggan',
+            'foto_toko' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
             'produk' => 'required|array|min:1',
             'produk.*.id_produk' => 'required|exists:produk,id_produk',
             'produk.*.jumlah' => 'required|integer|min:1',
         ]);
 
-        DB::transaction(function () use ($data) {
+        $fotoTokoPath = $request->file('foto_toko')->store('foto_toko', 'public');
+
+        try {
+        DB::transaction(function () use ($data, $fotoTokoPath) {
 
             $total = 0;
             $detailData = [];
@@ -115,6 +120,7 @@ class OrderController extends Controller
                 'tanggal_penjualan' => now()->toDateString(),
                 'total_penjualan' => $total,
                 'status_penjualan' => OrderStatus::MENUNGGU_VALIDASI->value,
+                'foto_toko' => $fotoTokoPath,
             ]);
 
             foreach ($detailData as $detail) {
@@ -128,6 +134,10 @@ class OrderController extends Controller
                 ]);
             }
         });
+        } catch (\Throwable $e) {
+            Storage::disk('public')->delete($fotoTokoPath);
+            throw $e;
+        }
 
         return redirect()
             ->route('order.index')
@@ -214,6 +224,7 @@ public function update(Request $request, Penjualan $order)
 
     $data = $request->validate([
         'id_pelanggan' => 'required|exists:pelanggan,id_pelanggan',
+        'foto_toko' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
 
         'produk' => 'required|array|min:1',
 
@@ -226,7 +237,15 @@ public function update(Request $request, Penjualan $order)
         'produk.*.jumlah' => 'required|integer|min:1',
     ]);
 
-    DB::transaction(function () use ($data, $order) {
+    $newFotoTokoPath = null;
+    $oldFotoTokoPath = $order->foto_toko;
+
+    if ($request->hasFile('foto_toko')) {
+        $newFotoTokoPath = $request->file('foto_toko')->store('foto_toko', 'public');
+    }
+
+    try {
+    DB::transaction(function () use ($data, $order, $newFotoTokoPath) {
 
         $total = 0;
         $detailBaru = [];
@@ -248,8 +267,7 @@ public function update(Request $request, Penjualan $order)
 
             if ($item['jumlah'] > $produk->stok_produk) {
                 throw ValidationException::withMessages([
-                    'produk' =>
-                        "Jumlah {$produk->nama_produk} melebihi stok."
+                    'produk' => "Jumlah {$produk->nama_produk} melebihi stok."
                 ]);
             }
 
@@ -266,10 +284,16 @@ public function update(Request $request, Penjualan $order)
             ];
         }
 
-        $order->update([
+        $updateData = [
             'id_pelanggan' => $data['id_pelanggan'],
             'total_penjualan' => $total,
-        ]);
+        ];
+
+        if ($newFotoTokoPath !== null) {
+            $updateData['foto_toko'] = $newFotoTokoPath;
+        }
+
+        $order->update($updateData);
 
         DetailPenjualan::where(
             'id_penjualan',
@@ -287,6 +311,16 @@ public function update(Request $request, Penjualan $order)
             ]);
         }
     });
+
+    if ($newFotoTokoPath !== null && $oldFotoTokoPath) {
+        Storage::disk('public')->delete($oldFotoTokoPath);
+    }
+    } catch (\Throwable $e) {
+        if ($newFotoTokoPath !== null) {
+            Storage::disk('public')->delete($newFotoTokoPath);
+        }
+        throw $e;
+    }
 
     return redirect()
         ->route('order.index')

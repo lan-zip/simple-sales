@@ -31,11 +31,27 @@
         </tbody>
         <tfoot><tr><th scope="row" colspan="3" class="numeric">Total Penjualan</th><td class="numeric font-bold"><x-ui.money :value="$sale->total_penjualan" /></td></tr></tfoot>
     </x-ui.data-table>
+    @if($sale->foto_toko)
+        <x-ui.card title="Foto Toko">
+            <div class="space-y-3">
+                <a href="{{ asset('storage/' . $sale->foto_toko) }}" target="_blank" rel="noopener noreferrer" class="inline-block" aria-label="Lihat foto toko ukuran penuh">
+                    <img src="{{ asset('storage/' . $sale->foto_toko) }}"
+                         alt="Foto Toko {{ $sale->pelanggan?->nama_toko ?? $sale->pelanggan?->nama_pelanggan ?? $sale->nomor_penjualan }}"
+                         class="rounded-lg border border-gray-200 shadow-sm max-w-full"
+                         style="max-height: 320px; object-fit: contain;">
+                </a>
+                <p class="cell-meta">Dokumentasi toko pelanggan saat order dicatat oleh Sales.</p>
+            </div>
+        </x-ui.card>
+    @endif
     @if($sale->foto_bukti_penyerahan)
         <x-ui.card title="Bukti Penyerahan">
             <div class="space-y-3">
-                <a href="{{ asset('storage/' . $sale->foto_bukti_penyerahan) }}" target="_blank" rel="noopener noreferrer" class="inline-block">
-                    <img src="{{ asset('storage/' . $sale->foto_bukti_penyerahan) }}" alt="Foto Bukti Penyerahan {{ $sale->nomor_penjualan }}" class="rounded-lg border border-gray-200 shadow-sm max-w-full" style="max-height: 360px; object-fit: contain;">
+                <a href="{{ asset('storage/' . $sale->foto_bukti_penyerahan) }}" target="_blank" rel="noopener noreferrer" class="inline-block" aria-label="Lihat foto bukti penyerahan ukuran penuh">
+                    <img src="{{ asset('storage/' . $sale->foto_bukti_penyerahan) }}"
+                         alt="Foto Bukti Penyerahan {{ $sale->nomor_penjualan }}"
+                         class="rounded-lg border border-gray-200 shadow-sm max-w-full"
+                         style="max-height: 360px; object-fit: contain;">
                 </a>
                 <p class="cell-meta">Dokumentasi penyerahan pesanan kepada customer.</p>
             </div>
