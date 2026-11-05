@@ -279,6 +279,8 @@
     .ui-table th, .ui-table td { padding-inline: 16px; }
     .page-actions { width: 100%; }
     .page-actions > .ui-button { flex-grow: 1; }
+    .page-actions > form { flex-grow: 1; display: flex; }
+    .page-actions > form > .ui-button { width: 100%; }
     .table-actions .ui-button { min-height: 44px; }
 }
 @media print {
