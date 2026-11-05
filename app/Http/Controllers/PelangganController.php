@@ -20,9 +20,9 @@ class PelangganController extends Controller
                     ->orWhere('no_wa', 'like', "%{$cari}%");
             });
         })
-        ->orderBy('id_pelanggan', 'desc')
-        ->paginate(10)
-        ->withQueryString();
+            ->orderBy('id_pelanggan', 'desc')
+            ->paginate(10)
+            ->withQueryString();
 
         return view('pelanggan.index', compact('pelanggan', 'cari'));
     }
@@ -53,11 +53,15 @@ class PelangganController extends Controller
 
     public function edit(Pelanggan $pelanggan)
     {
+        abort_if(auth()->user()?->role !== 'admin', 403, 'Akses ditolak.');
+
         return view('pelanggan.edit', compact('pelanggan'));
     }
 
     public function update(Request $request, Pelanggan $pelanggan)
     {
+        abort_if(auth()->user()?->role !== 'admin', 403, 'Akses ditolak.');
+
         $data = $request->validate([
             'kode_pelanggan' => [
                 'required',
@@ -80,6 +84,8 @@ class PelangganController extends Controller
 
     public function nonaktifkan(Pelanggan $pelanggan)
     {
+        abort_if(auth()->user()?->role !== 'admin', 403, 'Akses ditolak.');
+
         $pelanggan->update([
             'status_pelanggan' => 'nonaktif',
         ]);

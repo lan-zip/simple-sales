@@ -19,10 +19,13 @@
 <td class="cell-address">{{ $item->alamat_pelanggan }}</td>
 <td><x-ui.badge :status="$item->status_pelanggan" /></td>
                 <td><div class="table-actions">
-                    <x-ui.button :href="route('pelanggan.edit', $item)" variant="secondary" :aria-label="'Ubah Pelanggan '.$item->nama_pelanggan">Ubah</x-ui.button>
-                    @if($item->status_pelanggan === 'aktif')
-                        <x-ui.record-action :action="route('pelanggan.nonaktifkan', $item)" :message="'Nonaktifkan Pelanggan '.$item->nama_pelanggan.'?'" label="Nonaktifkan" />
-
+                    @if(auth()->user()?->role === 'admin')
+                        <x-ui.button :href="route('pelanggan.edit', $item)" variant="secondary" :aria-label="'Ubah Pelanggan '.$item->nama_pelanggan">Ubah</x-ui.button>
+                        @if($item->status_pelanggan === 'aktif')
+                            <x-ui.record-action :action="route('pelanggan.nonaktifkan', $item)" :message="'Nonaktifkan Pelanggan '.$item->nama_pelanggan.'?'" label="Nonaktifkan" />
+                        @endif
+                    @else
+                        <span class="cell-meta">—</span>
                     @endif
                 </div></td>
             </tr>

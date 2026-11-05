@@ -1,14 +1,13 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\SalesController;
-use App\Http\Controllers\PelangganController;
-use App\Http\Controllers\OrderController;
 use App\Http\Controllers\TransaksiController;
-
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,7 +18,6 @@ use App\Http\Controllers\TransaksiController;
 Route::get('/', function () {
     return redirect()->route('login');
 });
-
 
 /*
 |--------------------------------------------------------------------------
@@ -37,7 +35,6 @@ Route::middleware('guest')->group(function () {
 
 });
 
-
 /*
 |--------------------------------------------------------------------------
 | AUTHENTICATED USER
@@ -53,7 +50,6 @@ Route::middleware('auth')->group(function () {
         ->name('logout');
 
 });
-
 
 /*
 |--------------------------------------------------------------------------
@@ -83,7 +79,6 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::patch('/produk/{produk}/nonaktifkan', [ProdukController::class, 'nonaktifkan'])
         ->name('produk.nonaktifkan');
 
-
     // TRANSAKSI
 
     Route::get('/transaksi', [TransaksiController::class, 'index'])
@@ -97,7 +92,6 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
     Route::patch('/transaksi/{transaksi}/kirim', [TransaksiController::class, 'kirim'])
         ->name('transaksi.kirim');
-
 
     // SALES
 
@@ -122,8 +116,18 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::patch('/sales/{sales}/aktifkan', [SalesController::class, 'aktifkan'])
         ->name('sales.aktifkan');
 
-});
+    // PELANGGAN (ADMIN ONLY ACTIONS)
 
+    Route::get('/pelanggan/{pelanggan}/edit', [PelangganController::class, 'edit'])
+        ->name('pelanggan.edit');
+
+    Route::put('/pelanggan/{pelanggan}', [PelangganController::class, 'update'])
+        ->name('pelanggan.update');
+
+    Route::patch('/pelanggan/{pelanggan}/nonaktifkan', [PelangganController::class, 'nonaktifkan'])
+        ->name('pelanggan.nonaktifkan');
+
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -144,16 +148,6 @@ Route::middleware(['auth', 'role:admin,sales'])->group(function () {
     Route::post('/pelanggan', [PelangganController::class, 'store'])
         ->name('pelanggan.store');
 
-    Route::get('/pelanggan/{pelanggan}/edit', [PelangganController::class, 'edit'])
-        ->name('pelanggan.edit');
-
-    Route::put('/pelanggan/{pelanggan}', [PelangganController::class, 'update'])
-        ->name('pelanggan.update');
-
-    Route::patch('/pelanggan/{pelanggan}/nonaktifkan', [PelangganController::class, 'nonaktifkan'])
-        ->name('pelanggan.nonaktifkan');
-
-
     // KIRIM NOTA WHATSAPP
 
     Route::post(
@@ -162,7 +156,6 @@ Route::middleware(['auth', 'role:admin,sales'])->group(function () {
     )->name('transaksi.kirimNota');
 
 });
-
 
 /*
 |--------------------------------------------------------------------------
@@ -199,7 +192,6 @@ Route::middleware(['auth', 'role:sales'])->group(function () {
         ->name('order.selesai');
 
 });
-
 
 /*
 |--------------------------------------------------------------------------
