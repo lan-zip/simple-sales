@@ -2,7 +2,7 @@
 
 ## Digitalisasi Workflow dengan Fitur Integrasi Input Sales dan Admin pada PT. Halus Ciptanadi
 
-**Versi:** 0.2  
+**Versi:** 0.3
 **Status:** Working Product Baseline  
 **Repository:** `lan-zip/simple-sales`  
 **Branch Development:** `dev`
@@ -453,7 +453,7 @@ Sistem menyediakan kemampuan mencetak laporan sesuai kebutuhan sistem.
 | Kelola Sales | — | ✓ | — |
 | Lihat Customer | ✓ | ✓ | — |
 | Tambah Customer | ✓ | ✓ | — |
-| Edit Customer | sesuai permission final | ✓ | — |
+| Edit Customer | — | ✓ | — |
 | Nonaktifkan Customer | — | ✓ | — |
 | Buat Order | ✓ | — | — |
 | Edit Order Menunggu Validasi | ✓ | — | — |
@@ -754,14 +754,22 @@ Requirement berikut masih membutuhkan keputusan produk dan tidak boleh ditebak o
 
 ### OQ-01 — Permission Customer
 
-Apakah Sales hanya boleh:
+**Decision: Sales tidak memiliki permission untuk mengedit atau menonaktifkan customer.**
 
-- melihat dan menambah customer,
+Permission customer ditetapkan sebagai berikut:
 
-atau juga boleh:
+| Action | Admin | Sales | Direktur |
+|---|---:|---:|---:|
+| Melihat / list customer | ✓ | ✓ | — |
+| Menambah customer | ✓ | ✓ | — |
+| Mengedit / update customer | ✓ | — | — |
+| Menonaktifkan customer | ✓ | — | — |
 
-- mengubah customer,
-- menonaktifkan customer?
+Sales hanya diperbolehkan **melihat dan menambah customer**.
+
+Pengeditan, perubahan data master customer, dan penonaktifan customer dibatasi kepada Admin untuk menjaga integritas data customer, termasuk nomor WhatsApp yang digunakan sebagai sumber data utama untuk notifikasi WhatsApp.
+
+**Status:** Decided
 
 ### OQ-02 — WhatsApp Trigger
 
