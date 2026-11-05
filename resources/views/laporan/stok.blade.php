@@ -2,7 +2,30 @@
 @section('title', 'Laporan Stok')
 @section('header', 'Laporan Stok')
 @section('content')
-<x-ui.page-header title="Laporan Stok" subtitle="Informasi ketersediaan dan jumlah stok seluruh produk." />
+<x-ui.page-header title="Laporan Stok" subtitle="Informasi ketersediaan dan jumlah stok seluruh produk.">
+    <x-slot:actions>
+        <x-ui.button data-print class="no-print">
+            <x-ui.icon name="box" />
+            <span>Cetak Laporan</span>
+        </x-ui.button>
+    </x-slot:actions>
+</x-ui.page-header>
+
+<div class="print-brand print-report-header">
+    <div class="print-brand-row">
+        <div>
+            <p class="brand-name">PT. Halus Ciptanadi</p>
+            <p class="print-report-subtitle">Sistem Informasi Penjualan</p>
+        </div>
+        <div class="text-right">
+            <h2 class="print-report-title">Laporan Stok</h2>
+            <p class="print-report-timestamp">Dicetak pada: {{ now()->locale('id')->translatedFormat('d F Y H:i') }}</p>
+        </div>
+    </div>
+    <div class="print-filter-summary">
+        <div><strong>Status Produk:</strong> Semua Produk (Aktif &amp; Nonaktif)</div>
+    </div>
+</div>
 
 <x-ui.data-table caption="Daftar laporan stok produk">
     <thead>
@@ -32,7 +55,13 @@
         @endforelse
     </tbody>
     <x-slot:pagination>
-        <x-ui.pagination :paginator="$produk" />
+        <div class="no-print">
+            <x-ui.pagination :paginator="$produk" />
+        </div>
     </x-slot:pagination>
 </x-ui.data-table>
+
+<div class="print-report-footer print-only">
+    <p>Dicetak melalui Sistem Informasi Penjualan PT. Halus Ciptanadi · Dokumen Internal Direktur</p>
+</div>
 @endsection

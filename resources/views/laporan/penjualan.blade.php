@@ -2,8 +2,51 @@
 @section('title', 'Laporan Penjualan')
 @section('header', 'Laporan Penjualan')
 @section('content')
-<x-ui.page-header title="Laporan Penjualan" subtitle="Rekapitulasi transaksi penjualan selesai dan monitoring pendapatan." />
+<x-ui.page-header title="Laporan Penjualan" subtitle="Rekapitulasi transaksi penjualan selesai dan monitoring pendapatan.">
+    <x-slot:actions>
+        <x-ui.button data-print class="no-print">
+            <x-ui.icon name="receipt" />
+            <span>Cetak Laporan</span>
+        </x-ui.button>
+    </x-slot:actions>
+</x-ui.page-header>
 <x-ui.validation-summary class="mb-6" />
+
+@php
+    $selectedPelanggan = $idPelanggan ? $pelangganList->firstWhere('id_pelanggan', $idPelanggan) : null;
+    $pelangganLabel = $selectedPelanggan ? ($selectedPelanggan->nama_pelanggan . ' — ' . $selectedPelanggan->nama_toko) : 'Semua Pelanggan';
+
+    $selectedSales = $idUser ? $salesList->firstWhere('id_user', $idUser) : null;
+    $salesLabel = $selectedSales ? $selectedSales->nama_user : 'Semua Sales';
+
+    if ($tanggalMulai && $tanggalSelesai) {
+        $periodeLabel = \Carbon\Carbon::parse($tanggalMulai)->locale('id')->translatedFormat('d M Y') . ' s/d ' . \Carbon\Carbon::parse($tanggalSelesai)->locale('id')->translatedFormat('d M Y');
+    } elseif ($tanggalMulai) {
+        $periodeLabel = 'Mulai ' . \Carbon\Carbon::parse($tanggalMulai)->locale('id')->translatedFormat('d M Y');
+    } elseif ($tanggalSelesai) {
+        $periodeLabel = 'Sampai ' . \Carbon\Carbon::parse($tanggalSelesai)->locale('id')->translatedFormat('d M Y');
+    } else {
+        $periodeLabel = 'Semua Periode';
+    }
+@endphp
+
+<div class="print-brand print-report-header">
+    <div class="print-brand-row">
+        <div>
+            <p class="brand-name">PT. Halus Ciptanadi</p>
+            <p class="print-report-subtitle">Sistem Informasi Penjualan</p>
+        </div>
+        <div class="text-right">
+            <h2 class="print-report-title">Laporan Penjualan</h2>
+            <p class="print-report-timestamp">Dicetak pada: {{ now()->locale('id')->translatedFormat('d F Y H:i') }}</p>
+        </div>
+    </div>
+    <div class="print-filter-summary">
+        <div><strong>Periode:</strong> {{ $periodeLabel }}</div>
+        <div><strong>Pelanggan:</strong> {{ $pelangganLabel }}</div>
+        <div><strong>Sales:</strong> {{ $salesLabel }}</div>
+    </div>
+</div>
 
 <div class="ui-stat-grid mb-6">
     <x-ui.stat-card label="Total Pendapatan" tone="success" icon="money" description="Transaksi selesai · sesuai filter aktif">
@@ -12,7 +55,7 @@
     <x-ui.stat-card label="Total Transaksi Selesai" :value="number_format($totalTransaksi, 0, ',', '.')" icon="receipt" description="Transaksi selesai yang memenuhi kriteria" />
 </div>
 
-<div class="mb-6">
+<div class="mb-6 no-print">
     <x-ui.card title="Filter Laporan">
         <form action="{{ route('laporan.penjualan') }}" method="GET" data-submit-state>
             <div class="form-grid">
@@ -50,7 +93,7 @@
             <th scope="col">Sales</th>
             <th scope="col" class="numeric">Total</th>
             <th scope="col">Status</th>
-            <th scope="col" class="numeric">Aksi</th>
+            <th scope="col" class="numeric no-print">Aksi</th>
         </tr>
     </thead>
     <tbody>
@@ -68,7 +111,7 @@
                 <td>{{ $item->user?->nama_user ?? 'Sales tidak tersedia' }}</td>
                 <td class="numeric"><x-ui.money :value="$item->total_penjualan" /></td>
                 <td><x-ui.badge :status="$item->status_penjualan" /></td>
-                <td>
+                <td class="numeric no-print">
                     <div class="table-actions">
                         <x-ui.button :href="route('laporan.penjualan.show', $item)" variant="secondary" :aria-label="'Detail '.$item->nomor_penjualan">Detail</x-ui.button>
                     </div>
@@ -79,7 +122,13 @@
         @endforelse
     </tbody>
     <x-slot:pagination>
-        <x-ui.pagination :paginator="$transaksi" />
+        <div class="no-print">
+            <x-ui.pagination :paginator="$transaksi" />
+        </div>
     </x-slot:pagination>
 </x-ui.data-table>
+
+<div class="print-report-footer print-only">
+    <p>Dicetak melalui Sistem Informasi Penjualan PT. Halus Ciptanadi · Dokumen Internal Direktur</p>
+</div>
 @endsection
