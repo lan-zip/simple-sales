@@ -174,6 +174,7 @@
             .hc-auth-subtitle { font-size: 15px; }
             .hc-auth-heading { margin-bottom: 34px; }
             .hc-auth-actions { margin-top: 45px; }
+            .hc-auth-input { font-size: 16px; }
         }
 
         @media (prefers-reduced-motion: reduce) {
