@@ -19,6 +19,7 @@
         @endif
         @if($user->role === 'direktur')
             <x-layout.sidebar-item :href="route('laporan.penjualan')" :active="request()->routeIs('laporan.penjualan*')" icon="receipt">Laporan Penjualan</x-layout.sidebar-item>
+            <x-layout.sidebar-item :href="route('laporan.stok')" :active="request()->routeIs('laporan.stok*')" icon="box">Laporan Stok</x-layout.sidebar-item>
         @endif
     </nav>
     <div class="sidebar-footer">

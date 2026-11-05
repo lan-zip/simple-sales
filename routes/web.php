@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LaporanPenjualanController;
+use App\Http\Controllers\LaporanStokController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\ProdukController;
@@ -207,5 +208,8 @@ Route::middleware(['auth', 'role:direktur'])->group(function () {
 
     Route::get('/laporan-penjualan/{penjualan}', [LaporanPenjualanController::class, 'show'])
         ->name('laporan.penjualan.show');
+
+    Route::get('/laporan-stok', [LaporanStokController::class, 'index'])
+        ->name('laporan.stok');
 
 });
