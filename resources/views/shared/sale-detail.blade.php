@@ -58,4 +58,4 @@
         </x-ui.card>
     @endif
 </div>
-<div class="page-actions mt-6 no-print"><x-ui.button :href="route($isAdmin ? 'transaksi.index' : 'order.index')" variant="secondary">Kembali ke Daftar</x-ui.button></div>
+<div class="page-actions mt-6 no-print"><x-ui.button :href="$backUrl ?? route($isAdmin ? 'transaksi.index' : 'order.index')" variant="secondary">Kembali ke Daftar</x-ui.button></div>

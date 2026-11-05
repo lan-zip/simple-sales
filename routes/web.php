@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LaporanPenjualanController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\ProdukController;
@@ -201,6 +202,10 @@ Route::middleware(['auth', 'role:sales'])->group(function () {
 
 Route::middleware(['auth', 'role:direktur'])->group(function () {
 
-    // route khusus Direktur nanti ditaruh di sini
+    Route::get('/laporan-penjualan', [LaporanPenjualanController::class, 'index'])
+        ->name('laporan.penjualan');
+
+    Route::get('/laporan-penjualan/{penjualan}', [LaporanPenjualanController::class, 'show'])
+        ->name('laporan.penjualan.show');
 
 });
