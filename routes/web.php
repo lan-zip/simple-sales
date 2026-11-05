@@ -8,27 +8,6 @@ use App\Http\Controllers\SalesController;
 use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\TransaksiController;
-use Illuminate\Support\Facades\Http;
-
-
-/*
-|--------------------------------------------------------------------------
-| TEST FONNTE
-|--------------------------------------------------------------------------
-*/
-
-Route::get('/test-wa', function () {
-
-    $response = Http::withHeaders([
-        'Authorization' => config('services.fonnte.token'),
-    ])->asForm()->post('https://api.fonnte.com/send', [
-        'target' => '081334255490',
-        'message' => 'Halo, ini tes WhatsApp dari sistem PT Halus Ciptanadi.',
-        'countryCode' => '62',
-    ]);
-
-    return $response->json();
-});
 
 
 /*

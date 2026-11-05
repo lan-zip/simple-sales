@@ -66,7 +66,7 @@ class RedesignUiTest extends TestCase
         $this->admin = $this->user('admin');
         $this->sales = $this->user('sales');
         $this->product = Produk::create(['kode_produk'=>'QA-P','nama_produk'=>'Produk QA','kategori_produk'=>'QA','harga_produk'=>12500.25,'stok_produk'=>20,'satuan_produk'=>'pcs','status_produk'=>'aktif']);
-        $this->customer = Pelanggan::create(['kode_pelanggan'=>'QA-C','nama_pelanggan'=>'Pelanggan QA','nama_toko'=>'Toko QA','alamat_pelanggan'=>'Alamat QA','no_wa'=>'0800000000','status_pelanggan'=>'aktif']);
+        $this->customer = Pelanggan::create(['kode_pelanggan'=>'QA-C','nama_pelanggan'=>'Pelanggan QA','nama_toko'=>'Toko QA','alamat_pelanggan'=>'Alamat QA','no_wa'=>'081234567890','status_pelanggan'=>'aktif']);
     }
 
     private function user(string $role): User
