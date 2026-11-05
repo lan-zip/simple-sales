@@ -7,7 +7,15 @@
 </x-ui.page-header>
 <x-ui.validation-summary />
 <x-ui.data-table caption="Daftar Pelanggan">
-    <x-slot:toolbar><x-ui.search-toolbar :action="route('pelanggan.index')" :value="$cari" label="Cari Pelanggan" placeholder="Cari pelanggan, toko, kode, atau WhatsApp…" /></x-slot:toolbar>
+    <x-slot:toolbar>
+        <x-ui.search-toolbar :action="route('pelanggan.index')" :value="$cari" :filtered="(bool) ($status ?? '')" label="Cari Pelanggan" placeholder="Cari pelanggan, toko, kode, atau WhatsApp…">
+            <x-ui.select name="status" label="Status Pelanggan" id="filter-status">
+                <option value="">Semua Status</option>
+                <option value="aktif" @selected(($status ?? '') === 'aktif')>Aktif</option>
+                <option value="nonaktif" @selected(($status ?? '') === 'nonaktif')>Nonaktif</option>
+            </x-ui.select>
+        </x-ui.search-toolbar>
+    </x-slot:toolbar>
     <thead><tr><th scope="col">No.</th><th scope="col">Pelanggan</th><th scope="col">Nama Toko</th><th scope="col">WhatsApp</th><th scope="col">Alamat</th><th scope="col">Status</th><th scope="col" class="numeric">Aksi</th></tr></thead>
     <tbody>
         @forelse($pelanggan as $item)
@@ -30,7 +38,7 @@
                 </div></td>
             </tr>
         @empty
-            <x-ui.list-empty colspan="7" :filtered="(bool) $cari" title="Belum Ada Data Pelanggan" description="Tambahkan data Pelanggan untuk mulai digunakan dalam pencatatan penjualan." :create="route('pelanggan.create')" create-label="Tambah Pelanggan" :reset="route('pelanggan.index')" />
+            <x-ui.list-empty colspan="7" :filtered="(bool) $cari || (bool) ($status ?? '')" title="Belum Ada Data Pelanggan" description="Tambahkan data Pelanggan untuk mulai digunakan dalam pencatatan penjualan." :create="route('pelanggan.create')" create-label="Tambah Pelanggan" :reset="route('pelanggan.index')" />
         @endforelse
     </tbody>
     <x-slot:pagination><x-ui.pagination :paginator="$pelanggan" /></x-slot:pagination>

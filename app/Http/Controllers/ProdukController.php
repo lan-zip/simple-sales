@@ -10,18 +10,29 @@ class ProdukController extends Controller
 {
     public function index(Request $request)
     {
-        $cari = $request->cari;
+        $rawCari = $request->input('cari');
+        $cari = is_string($rawCari) ? trim($rawCari) : null;
+
+        $rawStatus = $request->input('status');
+        $status = is_string($rawStatus) && in_array($rawStatus, ['aktif', 'nonaktif'], true)
+            ? $rawStatus
+            : null;
 
         $produk = Produk::when($cari, function ($query, $cari) {
-            $query->where('kode_produk', 'like', "%{$cari}%")
-                ->orWhere('nama_produk', 'like', "%{$cari}%")
-                ->orWhere('kategori_produk', 'like', "%{$cari}%");
+            $query->where(function ($q) use ($cari) {
+                $q->where('kode_produk', 'like', "%{$cari}%")
+                    ->orWhere('nama_produk', 'like', "%{$cari}%")
+                    ->orWhere('kategori_produk', 'like', "%{$cari}%");
+            });
         })
-        ->orderBy('id_produk', 'desc')
-        ->paginate(10)
-        ->withQueryString();
+            ->when($status, function ($query, $status) {
+                $query->where('status_produk', $status);
+            })
+            ->orderBy('id_produk', 'desc')
+            ->paginate(10)
+            ->withQueryString();
 
-        return view('produk.index', compact('produk', 'cari'));
+        return view('produk.index', compact('produk', 'cari', 'status'));
     }
 
     public function create()
