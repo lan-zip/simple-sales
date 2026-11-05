@@ -17,6 +17,9 @@
         @if($user->role === 'sales')
             <x-layout.sidebar-item :href="route('order.index')" :active="request()->routeIs('order.*')" icon="receipt">Order Penjualan</x-layout.sidebar-item>
         @endif
+        @if($user->role === 'direktur')
+            <x-layout.sidebar-item :href="route('laporan.penjualan')" :active="request()->routeIs('laporan.penjualan*')" icon="receipt">Laporan Penjualan</x-layout.sidebar-item>
+        @endif
     </nav>
     <div class="sidebar-footer">
         <form action="{{ route('logout') }}" method="POST" data-submit-state>
