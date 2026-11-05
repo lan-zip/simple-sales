@@ -107,7 +107,7 @@ php artisan key:generate
 Configure your database inside `.env`.
 
 ```env
-DB_DATABASE=your_database
+DB_DATABASE=simple_sales
 DB_USERNAME=root
 DB_PASSWORD=
 ```
