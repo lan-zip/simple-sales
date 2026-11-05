@@ -36,7 +36,8 @@ return [
     ],
 
     'fonnte' => [
-        'token' => env('FONNTE_TOKEN'),
+        'token' => env('FONNTE_TOKEN', env('APP_ENV') === 'testing' ? 'testing-fonnte-token' : null),
+        'url' => env('FONNTE_URL', 'https://api.fonnte.com/send'),
     ],
 
 ];

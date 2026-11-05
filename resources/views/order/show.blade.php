@@ -10,6 +10,9 @@
             @if($order->isDikirim() && $order->foto_bukti_penyerahan)
                 <x-ui.record-action :action="route('order.selesai', $order)" message="Selesaikan order ini? Status akan diperbarui menjadi selesai dan transaksi dianggap tuntas." label="Selesaikan Order" variant="primary" />
             @endif
+            @if(auth()->user()?->role === 'sales' && (int) $order->id_user === (int) auth()->id() && in_array($order->getRawOriginal('status_penjualan') ?? $order->statusValue(), ['diproses', 'dikirim', 'selesai'], true))
+                <x-ui.record-action :action="route('transaksi.kirimNota', $order)" method="POST" message="Kirim ulang nota penjualan ini ke nomor WhatsApp pelanggan?" label="Kirim Ulang WhatsApp" variant="secondary" class="no-print" />
+            @endif
             @if($order->canPrintNota())<x-ui.button data-print>Cetak Nota</x-ui.button>@endif
         </div>
     </x-slot:actions>

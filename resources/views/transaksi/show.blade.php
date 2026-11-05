@@ -5,14 +5,19 @@
 <x-ui.page-header title="Detail Transaksi" :subtitle="'Periksa rincian transaksi '.$transaksi->nomor_penjualan.'.'" class="no-print">
     <x-slot:badge><x-ui.badge :status="$transaksi->status_penjualan" /></x-slot:badge>
     <x-slot:actions>
-        @if($transaksi->isMenungguValidasi())
-            <x-ui.record-action :action="route('transaksi.validasi', $transaksi)" message="Validasi transaksi ini? Stok produk akan dikurangi dan status transaksi berubah menjadi diproses." label="Validasi Transaksi" variant="primary" />
-        @elseif($transaksi->isDiproses())
-            <x-ui.record-action :action="route('transaksi.kirim', $transaksi)" message="Ubah status transaksi menjadi dikirim? Pastikan pesanan siap atau sedang dalam proses pengiriman." label="Kirim Pesanan" variant="primary" />
-        @endif
-        @if($transaksi->canPrintNota())
-            <x-ui.button data-print>Cetak Nota</x-ui.button>
-        @endif
+        <div class="page-actions no-print">
+            @if($transaksi->isMenungguValidasi())
+                <x-ui.record-action :action="route('transaksi.validasi', $transaksi)" message="Validasi transaksi ini? Stok produk akan dikurangi dan status transaksi berubah menjadi diproses." label="Validasi Transaksi" variant="primary" />
+            @elseif($transaksi->isDiproses())
+                <x-ui.record-action :action="route('transaksi.kirim', $transaksi)" message="Ubah status transaksi menjadi dikirim? Pastikan pesanan siap atau sedang dalam proses pengiriman." label="Kirim Pesanan" variant="primary" />
+            @endif
+            @if(auth()->user()?->role === 'admin' && in_array($transaksi->getRawOriginal('status_penjualan') ?? $transaksi->statusValue(), ['diproses', 'dikirim', 'selesai'], true))
+                <x-ui.record-action :action="route('transaksi.kirimNota', $transaksi)" method="POST" message="Kirim ulang nota penjualan ini ke nomor WhatsApp pelanggan?" label="Kirim Ulang WhatsApp" variant="secondary" class="no-print" />
+            @endif
+            @if($transaksi->canPrintNota())
+                <x-ui.button data-print>Cetak Nota</x-ui.button>
+            @endif
+        </div>
     </x-slot:actions>
 </x-ui.page-header>
 @if($transaksi->isMenungguValidasi())
