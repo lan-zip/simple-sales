@@ -1,17 +1,12 @@
 <x-ui.data-table :caption="$isAdmin ? 'Daftar transaksi penjualan' : 'Daftar order Anda'">
     <x-slot:toolbar>
-        <x-ui.search-toolbar :action="route($routePrefix.'.index')" :value="$cari" :filtered="$isAdmin && (bool) ($status ?? '')" :placeholder="$isAdmin ? 'Cari nomor transaksi, pelanggan, toko, atau sales…' : 'Cari nomor order, pelanggan, atau toko…'" label="Cari penjualan">
-            @if($isAdmin)
-                <x-ui.select name="status" label="Status Transaksi" id="filter-status">
-                    <option value="">Semua Status</option>
-                    @foreach(\App\Enums\OrderStatus::cases() as $case)
-                        <option value="{{ $case->value }}" @selected($status === $case->value)>{{ $case->label() }}</option>
-                    @endforeach
-                    @if($status && !\App\Enums\OrderStatus::tryFrom($status))
-                        <option value="{{ $status }}" selected>{{ ucfirst(str_replace('_', ' ', $status)) }}</option>
-                    @endif
-                </x-ui.select>
-            @endif
+        <x-ui.search-toolbar :action="route($routePrefix.'.index')" :value="$cari" :filtered="(bool) ($status ?? '')" :placeholder="$isAdmin ? 'Cari nomor transaksi, pelanggan, toko, atau sales…' : 'Cari nomor order, pelanggan, atau toko…'" label="Cari penjualan">
+            <x-ui.select name="status" :label="$isAdmin ? 'Status Transaksi' : 'Status Order'" id="filter-status">
+                <option value="">Semua Status</option>
+                @foreach(\App\Enums\OrderStatus::cases() as $case)
+                    <option value="{{ $case->value }}" @selected($status === $case->value)>{{ $case->label() }}</option>
+                @endforeach
+            </x-ui.select>
         </x-ui.search-toolbar>
     </x-slot:toolbar>
     <thead><tr>
@@ -36,7 +31,7 @@
                 </div></td>
             </tr>
         @empty
-            <x-ui.list-empty :colspan="$isAdmin ? 7 : 6" :filtered="(bool) $cari || ($isAdmin && (bool) ($status ?? ''))" :title="$isAdmin ? 'Belum Ada Transaksi' : 'Belum Ada Order'" :description="$isAdmin ? 'Order dari Sales akan muncul di sini untuk diperiksa.' : 'Catat order pertama Anda dengan memilih pelanggan dan produk.'" :create="$isAdmin ? null : route('order.create')" create-label="Tambah Order" :reset="route($routePrefix.'.index')" />
+            <x-ui.list-empty :colspan="$isAdmin ? 7 : 6" :filtered="(bool) $cari || (bool) ($status ?? '')" :title="$isAdmin ? 'Belum Ada Transaksi' : 'Belum Ada Order'" :description="$isAdmin ? 'Order dari Sales akan muncul di sini untuk diperiksa.' : 'Catat order pertama Anda dengan memilih pelanggan dan produk.'" :create="$isAdmin ? null : route('order.create')" create-label="Tambah Order" :reset="route($routePrefix.'.index')" />
         @endforelse
     </tbody>
     <x-slot:pagination><x-ui.pagination :paginator="$records" /></x-slot:pagination>

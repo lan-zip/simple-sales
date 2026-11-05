@@ -11,7 +11,13 @@ class SalesController extends Controller
 {
     public function index(Request $request)
     {
-        $cari = $request->cari;
+        $rawCari = $request->input('cari');
+        $cari = is_string($rawCari) ? trim($rawCari) : null;
+
+        $rawStatus = $request->input('status');
+        $status = is_string($rawStatus) && in_array($rawStatus, ['aktif', 'nonaktif'], true)
+            ? $rawStatus
+            : null;
 
         $sales = User::where('role', 'sales')
             ->when($cari, function ($query, $cari) {
@@ -21,11 +27,14 @@ class SalesController extends Controller
                         ->orWhere('no_telp', 'like', "%{$cari}%");
                 });
             })
+            ->when($status, function ($query, $status) {
+                $query->where('status_user', $status);
+            })
             ->orderBy('id_user', 'desc')
             ->paginate(10)
             ->withQueryString();
 
-        return view('sales.index', compact('sales', 'cari'));
+        return view('sales.index', compact('sales', 'cari', 'status'));
     }
 
     public function create()

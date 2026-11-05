@@ -10,7 +10,13 @@ class PelangganController extends Controller
 {
     public function index(Request $request)
     {
-        $cari = $request->cari;
+        $rawCari = $request->input('cari');
+        $cari = is_string($rawCari) ? trim($rawCari) : null;
+
+        $rawStatus = $request->input('status');
+        $status = is_string($rawStatus) && in_array($rawStatus, ['aktif', 'nonaktif'], true)
+            ? $rawStatus
+            : null;
 
         $pelanggan = Pelanggan::when($cari, function ($query, $cari) {
             $query->where(function ($q) use ($cari) {
@@ -20,11 +26,14 @@ class PelangganController extends Controller
                     ->orWhere('no_wa', 'like', "%{$cari}%");
             });
         })
+            ->when($status, function ($query, $status) {
+                $query->where('status_pelanggan', $status);
+            })
             ->orderBy('id_pelanggan', 'desc')
             ->paginate(10)
             ->withQueryString();
 
-        return view('pelanggan.index', compact('pelanggan', 'cari'));
+        return view('pelanggan.index', compact('pelanggan', 'cari', 'status'));
     }
 
     public function create()

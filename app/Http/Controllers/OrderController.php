@@ -16,7 +16,13 @@ class OrderController extends Controller
 {
     public function index(Request $request)
     {
-        $cari = $request->cari;
+        $rawCari = $request->input('cari');
+        $cari = is_string($rawCari) ? trim($rawCari) : null;
+
+        $rawStatus = $request->input('status');
+        $status = is_string($rawStatus)
+            ? OrderStatus::tryFrom($rawStatus)?->value
+            : null;
 
         $order = Penjualan::with('pelanggan')
             ->where('id_user', auth()->user()->id_user)
@@ -29,11 +35,14 @@ class OrderController extends Controller
                         });
                 });
             })
+            ->when($status, function ($query, $status) {
+                $query->where('status_penjualan', $status);
+            })
             ->orderBy('id_penjualan', 'desc')
             ->paginate(10)
             ->withQueryString();
 
-        return view('order.index', compact('order', 'cari'));
+        return view('order.index', compact('order', 'cari', 'status'));
     }
 
     public function create()

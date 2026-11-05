@@ -19,73 +19,38 @@ class TransaksiController extends Controller
 
     public function index(Request $request)
     {
-        $cari = $request->cari;
-        $status = $request->status;
+        $rawCari = $request->input('cari');
+        $cari = is_string($rawCari) ? trim($rawCari) : null;
+
+        $rawStatus = $request->input('status');
+        $status = is_string($rawStatus)
+            ? OrderStatus::tryFrom($rawStatus)?->value
+            : null;
 
         $transaksi = Penjualan::with([
-                'pelanggan',
-                'user'
-            ])
+            'pelanggan',
+            'user',
+        ])
             ->when($cari, function ($query, $cari) {
-
                 $query->where(function ($q) use ($cari) {
-
-                    $q->where(
-                        'nomor_penjualan',
-                        'like',
-                        "%{$cari}%"
-                    )
-                    ->orWhereHas(
-                        'pelanggan',
-                        function ($pelanggan) use ($cari) {
-
-                            $pelanggan
-                                ->where(
-                                    'nama_pelanggan',
-                                    'like',
-                                    "%{$cari}%"
-                                )
-                                ->orWhere(
-                                    'nama_toko',
-                                    'like',
-                                    "%{$cari}%"
-                                );
-                        }
-                    )
-                    ->orWhereHas(
-                        'user',
-                        function ($user) use ($cari) {
-
-                            $user->where(
-                                'nama_user',
-                                'like',
-                                "%{$cari}%"
-                            );
-                        }
-                    );
+                    $q->where('nomor_penjualan', 'like', "%{$cari}%")
+                        ->orWhereHas('pelanggan', function ($pelanggan) use ($cari) {
+                            $pelanggan->where('nama_pelanggan', 'like', "%{$cari}%")
+                                ->orWhere('nama_toko', 'like', "%{$cari}%");
+                        })
+                        ->orWhereHas('user', function ($user) use ($cari) {
+                            $user->where('nama_user', 'like', "%{$cari}%");
+                        });
                 });
             })
-
             ->when($status, function ($query, $status) {
-
-                $query->where(
-                    'status_penjualan',
-                    $status
-                );
+                $query->where('status_penjualan', $status);
             })
-
             ->orderBy('id_penjualan', 'desc')
             ->paginate(10)
             ->withQueryString();
 
-        return view(
-            'transaksi.index',
-            compact(
-                'transaksi',
-                'cari',
-                'status'
-            )
-        );
+        return view('transaksi.index', compact('transaksi', 'cari', 'status'));
     }
 
     public function show(Penjualan $transaksi)

@@ -7,7 +7,15 @@
 </x-ui.page-header>
 <x-ui.validation-summary />
 <x-ui.data-table caption="Daftar Produk">
-    <x-slot:toolbar><x-ui.search-toolbar :action="route('produk.index')" :value="$cari" label="Cari Produk" placeholder="Cari kode, nama, atau kategori produk…" /></x-slot:toolbar>
+    <x-slot:toolbar>
+        <x-ui.search-toolbar :action="route('produk.index')" :value="$cari" :filtered="(bool) ($status ?? '')" label="Cari Produk" placeholder="Cari kode, nama, atau kategori produk…">
+            <x-ui.select name="status" label="Status Produk" id="filter-status">
+                <option value="">Semua Status</option>
+                <option value="aktif" @selected(($status ?? '') === 'aktif')>Aktif</option>
+                <option value="nonaktif" @selected(($status ?? '') === 'nonaktif')>Nonaktif</option>
+            </x-ui.select>
+        </x-ui.search-toolbar>
+    </x-slot:toolbar>
     <thead><tr><th scope="col">No.</th><th scope="col">Produk</th><th scope="col">Kategori</th><th scope="col" class="numeric">Harga</th><th scope="col" class="numeric">Stok / Satuan</th><th scope="col">Status</th><th scope="col" class="numeric">Aksi</th></tr></thead>
     <tbody>
         @forelse($produk as $item)
@@ -27,7 +35,7 @@
                 </div></td>
             </tr>
         @empty
-            <x-ui.list-empty colspan="7" :filtered="(bool) $cari" title="Belum Ada Data Produk" description="Tambahkan data Produk untuk mulai digunakan dalam pencatatan penjualan." :create="route('produk.create')" create-label="Tambah Produk" :reset="route('produk.index')" />
+            <x-ui.list-empty colspan="7" :filtered="(bool) $cari || (bool) ($status ?? '')" title="Belum Ada Data Produk" description="Tambahkan data Produk untuk mulai digunakan dalam pencatatan penjualan." :create="route('produk.create')" create-label="Tambah Produk" :reset="route('produk.index')" />
         @endforelse
     </tbody>
     <x-slot:pagination><x-ui.pagination :paginator="$produk" /></x-slot:pagination>
