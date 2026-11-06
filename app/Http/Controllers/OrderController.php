@@ -79,7 +79,11 @@ class OrderController extends Controller
             'id_pelanggan' => 'required|exists:pelanggan,id_pelanggan',
             'foto_toko' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
             'produk' => 'required|array|min:1',
-            'produk.*.id_produk' => 'required|exists:produk,id_produk',
+            'produk.*.id_produk' => [
+                'required',
+                'distinct',
+                'exists:produk,id_produk',
+            ],
             'produk.*.jumlah' => 'required|integer|min:1',
         ], [
             'id_pelanggan.required' => 'Pilih pelanggan terlebih dahulu.',
@@ -92,6 +96,7 @@ class OrderController extends Controller
             'produk.array' => 'Daftar produk tidak valid.',
             'produk.min' => 'Pilih minimal satu produk.',
             'produk.*.id_produk.required' => 'Produk wajib dipilih.',
+            'produk.*.id_produk.distinct' => 'Produk tidak boleh dipilih lebih dari satu kali.',
             'produk.*.id_produk.exists' => 'Produk yang dipilih tidak valid.',
             'produk.*.jumlah.required' => 'Jumlah produk wajib diisi.',
             'produk.*.jumlah.integer' => 'Jumlah produk harus berupa bilangan bulat.',
