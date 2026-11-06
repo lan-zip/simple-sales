@@ -9,6 +9,7 @@ use App\Models\Penjualan;
 use App\Models\Produk;
 use App\Models\User;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
@@ -266,6 +267,18 @@ class UxAccessibilityConsistencyTest extends TestCase
             'stok_produk' => 100,
             'satuan_produk' => 'pcs',
             'status_produk' => 'aktif',
+        ]);
+
+        $duplicateStoreResponse = $this->post('/order', [
+            'id_pelanggan' => $customer->id_pelanggan,
+            'foto_toko' => UploadedFile::fake()->image('toko.jpg'),
+            'produk' => [
+                ['id_produk' => $productA->id_produk, 'jumlah' => 1],
+                ['id_produk' => $productA->id_produk, 'jumlah' => 2],
+            ],
+        ]);
+        $duplicateStoreResponse->assertSessionHasErrors([
+            'produk.0.id_produk' => 'Produk tidak boleh dipilih lebih dari satu kali.',
         ]);
 
         // Duplicate product rows in order update
