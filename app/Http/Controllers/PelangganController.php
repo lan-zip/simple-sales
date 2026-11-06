@@ -49,6 +49,17 @@ class PelangganController extends Controller
             'nama_toko' => 'required|max:100',
             'alamat_pelanggan' => 'required',
             'no_wa' => 'required|max:20',
+        ], [
+            'kode_pelanggan.required' => 'Kode pelanggan wajib diisi.',
+            'kode_pelanggan.max' => 'Kode pelanggan maksimal 30 karakter.',
+            'kode_pelanggan.unique' => 'Kode pelanggan sudah digunakan.',
+            'nama_pelanggan.required' => 'Nama pelanggan wajib diisi.',
+            'nama_pelanggan.max' => 'Nama pelanggan maksimal 100 karakter.',
+            'nama_toko.required' => 'Nama toko wajib diisi.',
+            'nama_toko.max' => 'Nama toko maksimal 100 karakter.',
+            'alamat_pelanggan.required' => 'Alamat pelanggan wajib diisi.',
+            'no_wa.required' => 'Nomor WhatsApp wajib diisi.',
+            'no_wa.max' => 'Nomor WhatsApp maksimal 20 karakter.',
         ]);
 
         $data['status_pelanggan'] = 'aktif';
@@ -82,6 +93,17 @@ class PelangganController extends Controller
             'nama_toko' => 'required|max:100',
             'alamat_pelanggan' => 'required',
             'no_wa' => 'required|max:20',
+        ], [
+            'kode_pelanggan.required' => 'Kode pelanggan wajib diisi.',
+            'kode_pelanggan.max' => 'Kode pelanggan maksimal 30 karakter.',
+            'kode_pelanggan.unique' => 'Kode pelanggan sudah digunakan.',
+            'nama_pelanggan.required' => 'Nama pelanggan wajib diisi.',
+            'nama_pelanggan.max' => 'Nama pelanggan maksimal 100 karakter.',
+            'nama_toko.required' => 'Nama toko wajib diisi.',
+            'nama_toko.max' => 'Nama toko maksimal 100 karakter.',
+            'alamat_pelanggan.required' => 'Alamat pelanggan wajib diisi.',
+            'no_wa.required' => 'Nomor WhatsApp wajib diisi.',
+            'no_wa.max' => 'Nomor WhatsApp maksimal 20 karakter.',
         ]);
 
         $pelanggan->update($data);

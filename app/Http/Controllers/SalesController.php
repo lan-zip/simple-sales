@@ -50,6 +50,17 @@ class SalesController extends Controller
             'password' => 'required|min:6',
             'no_telp' => 'required|max:20',
             'alamat' => 'required',
+        ], [
+            'nama_user.required' => 'Nama sales wajib diisi.',
+            'nama_user.max' => 'Nama sales maksimal 100 karakter.',
+            'username.required' => 'Username wajib diisi.',
+            'username.max' => 'Username maksimal 50 karakter.',
+            'username.unique' => 'Username sudah digunakan.',
+            'password.required' => 'Password wajib diisi.',
+            'password.min' => 'Password minimal 6 karakter.',
+            'no_telp.required' => 'Nomor telepon wajib diisi.',
+            'no_telp.max' => 'Nomor telepon maksimal 20 karakter.',
+            'alamat.required' => 'Alamat wajib diisi.',
         ]);
 
         User::create([
@@ -89,6 +100,16 @@ class SalesController extends Controller
             'no_telp' => 'required|max:20',
             'alamat' => 'required',
             'password' => 'nullable|min:6',
+        ], [
+            'nama_user.required' => 'Nama sales wajib diisi.',
+            'nama_user.max' => 'Nama sales maksimal 100 karakter.',
+            'username.required' => 'Username wajib diisi.',
+            'username.max' => 'Username maksimal 50 karakter.',
+            'username.unique' => 'Username sudah digunakan.',
+            'password.min' => 'Password minimal 6 karakter.',
+            'no_telp.required' => 'Nomor telepon wajib diisi.',
+            'no_telp.max' => 'Nomor telepon maksimal 20 karakter.',
+            'alamat.required' => 'Alamat wajib diisi.',
         ]);
 
         $sales->nama_user = $data['nama_user'];
@@ -96,7 +117,7 @@ class SalesController extends Controller
         $sales->no_telp = $data['no_telp'];
         $sales->alamat = $data['alamat'];
 
-        if (!empty($data['password'])) {
+        if (! empty($data['password'])) {
             $sales->password = Hash::make($data['password']);
         }
 
@@ -112,7 +133,7 @@ class SalesController extends Controller
         abort_if($sales->role !== 'sales', 404);
 
         $sales->update([
-            'status_user' => 'nonaktif'
+            'status_user' => 'nonaktif',
         ]);
 
         return redirect()
@@ -125,7 +146,7 @@ class SalesController extends Controller
         abort_if($sales->role !== 'sales', 404);
 
         $sales->update([
-            'status_user' => 'aktif'
+            'status_user' => 'aktif',
         ]);
 
         return redirect()

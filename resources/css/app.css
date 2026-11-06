@@ -111,14 +111,15 @@
     .ui-button--danger:hover { box-shadow: inset 0 0 0 100px rgba(0, 0, 0, .1); }
     .ui-button:active { box-shadow: inset 0 0 0 100px rgba(0, 0, 0, .08); }
     .ui-button:disabled, .ui-button[aria-disabled='true'] { opacity: .5; cursor: not-allowed; pointer-events: none; }
+    .ui-button:focus-visible, .text-link:focus-visible, .ui-page-number:focus-visible { outline: 2px solid var(--color-brand-900); outline-offset: 2px; }
     .ui-field { min-width: 0; }
     .ui-label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 500; color: var(--color-text-secondary); }
     .ui-input { width: 100%; min-width: 0; height: 44px; padding: 8px 16px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: white; color: var(--color-text-primary); font-size: 16px; line-height: 1.5; }
     .ui-input::placeholder { color: var(--color-text-placeholder); }
-    .ui-input:focus { border-color: var(--color-brand-900); outline: 2px solid color-mix(in srgb, var(--color-brand-900) 20%, transparent); outline-offset: 1px; }
+    .ui-input:focus { border-color: var(--color-brand-900); outline: 2px solid var(--color-brand-900); outline-offset: 1px; box-shadow: 0 0 0 3px rgba(111, 13, 13, .2); }
     .ui-input:disabled { background: var(--color-surface-muted); opacity: .5; cursor: not-allowed; }
     .ui-input.is-invalid { border-color: var(--accent-danger); }
-    .ui-input.is-invalid:focus { outline-color: var(--accent-danger); }
+    .ui-input.is-invalid:focus { outline-color: var(--accent-danger); box-shadow: 0 0 0 3px rgba(179, 38, 30, .2); }
     .ui-textarea { height: auto; min-height: 120px; resize: vertical; }
     .ui-field-hint, .ui-field-error { margin-top: 8px; font-size: 12px; line-height: 1.5; }
     .ui-field-hint { color: var(--color-text-secondary); }
