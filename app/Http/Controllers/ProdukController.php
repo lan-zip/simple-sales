@@ -49,6 +49,22 @@ class ProdukController extends Controller
             'harga_produk' => 'required|numeric|min:0',
             'stok_produk' => 'required|integer|min:0',
             'satuan_produk' => 'required|max:50',
+        ], [
+            'kode_produk.required' => 'Kode produk wajib diisi.',
+            'kode_produk.max' => 'Kode produk maksimal 30 karakter.',
+            'kode_produk.unique' => 'Kode produk sudah digunakan.',
+            'nama_produk.required' => 'Nama produk wajib diisi.',
+            'nama_produk.max' => 'Nama produk maksimal 100 karakter.',
+            'kategori_produk.required' => 'Kategori produk wajib diisi.',
+            'kategori_produk.max' => 'Kategori produk maksimal 100 karakter.',
+            'harga_produk.required' => 'Harga produk wajib diisi.',
+            'harga_produk.numeric' => 'Harga produk harus berupa angka.',
+            'harga_produk.min' => 'Harga produk tidak boleh kurang dari 0.',
+            'stok_produk.required' => 'Stok produk wajib diisi.',
+            'stok_produk.integer' => 'Stok produk harus berupa bilangan bulat.',
+            'stok_produk.min' => 'Stok produk tidak boleh kurang dari 0.',
+            'satuan_produk.required' => 'Satuan produk wajib diisi.',
+            'satuan_produk.max' => 'Satuan produk maksimal 50 karakter.',
         ]);
 
         $data['status_produk'] = 'aktif';
@@ -79,6 +95,22 @@ class ProdukController extends Controller
             'harga_produk' => 'required|numeric|min:0',
             'stok_produk' => 'required|integer|min:0',
             'satuan_produk' => 'required|max:50',
+        ], [
+            'kode_produk.required' => 'Kode produk wajib diisi.',
+            'kode_produk.max' => 'Kode produk maksimal 30 karakter.',
+            'kode_produk.unique' => 'Kode produk sudah digunakan.',
+            'nama_produk.required' => 'Nama produk wajib diisi.',
+            'nama_produk.max' => 'Nama produk maksimal 100 karakter.',
+            'kategori_produk.required' => 'Kategori produk wajib diisi.',
+            'kategori_produk.max' => 'Kategori produk maksimal 100 karakter.',
+            'harga_produk.required' => 'Harga produk wajib diisi.',
+            'harga_produk.numeric' => 'Harga produk harus berupa angka.',
+            'harga_produk.min' => 'Harga produk tidak boleh kurang dari 0.',
+            'stok_produk.required' => 'Stok produk wajib diisi.',
+            'stok_produk.integer' => 'Stok produk harus berupa bilangan bulat.',
+            'stok_produk.min' => 'Stok produk tidak boleh kurang dari 0.',
+            'satuan_produk.required' => 'Satuan produk wajib diisi.',
+            'satuan_produk.max' => 'Satuan produk maksimal 50 karakter.',
         ]);
 
         $produk->update($data);
@@ -91,7 +123,7 @@ class ProdukController extends Controller
     public function nonaktifkan(Produk $produk)
     {
         $produk->update([
-            'status_produk' => 'nonaktif'
+            'status_produk' => 'nonaktif',
         ]);
 
         return redirect()

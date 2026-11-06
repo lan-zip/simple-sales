@@ -8,6 +8,7 @@ use App\Models\Penjualan;
 use App\Models\Produk;
 use App\Models\User;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
@@ -295,26 +296,32 @@ class DirectorStockReportTest extends TestCase
 
     public function test_stock_updates_on_product_are_immediately_reflected_on_report(): void
     {
-        $this->actingAs($this->director);
+        Carbon::setTestNow('2026-10-15 10:00:00');
 
-        $product = $this->createProduct([
-            'kode_produk' => 'PRD-LIVE',
-            'nama_produk' => 'Susu Kental Manis',
-            'stok_produk' => 50,
-        ]);
+        try {
+            $this->actingAs($this->director);
 
-        $response1 = $this->get('/laporan-stok');
-        $response1->assertOk();
-        $response1->assertSee('50');
+            $product = $this->createProduct([
+                'kode_produk' => 'PRD-LIVE',
+                'nama_produk' => 'Susu Kental Manis',
+                'stok_produk' => 50,
+            ]);
 
-        // Stock deduction or adjustment on Produk model
-        $product->update(['stok_produk' => 38]);
+            $response1 = $this->get('/laporan-stok');
+            $response1->assertOk();
+            $response1->assertSee('<td class="numeric font-medium">50</td>', false);
 
-        // Subsequent request reflects the updated stock immediately
-        $response2 = $this->get('/laporan-stok');
-        $response2->assertOk();
-        $response2->assertSee('38');
-        $response2->assertDontSee('50');
+            // Stock deduction or adjustment on Produk model
+            $product->update(['stok_produk' => 38]);
+
+            // Subsequent request reflects the updated stock immediately
+            $response2 = $this->get('/laporan-stok');
+            $response2->assertOk();
+            $response2->assertSee('<td class="numeric font-medium">38</td>', false);
+            $response2->assertDontSee('<td class="numeric font-medium">50</td>', false);
+        } finally {
+            Carbon::setTestNow();
+        }
     }
 
     public function test_stock_report_does_not_derive_stock_from_sales_transactions(): void

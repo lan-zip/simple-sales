@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Enums\OrderStatus;
-use App\Models\Pelanggan;
-use App\Models\Produk;
-use App\Models\Penjualan;
 use App\Models\DetailPenjualan;
+use App\Models\Pelanggan;
+use App\Models\Penjualan;
+use App\Models\Produk;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -81,68 +81,83 @@ class OrderController extends Controller
             'produk' => 'required|array|min:1',
             'produk.*.id_produk' => 'required|exists:produk,id_produk',
             'produk.*.jumlah' => 'required|integer|min:1',
+        ], [
+            'id_pelanggan.required' => 'Pilih pelanggan terlebih dahulu.',
+            'id_pelanggan.exists' => 'Pelanggan yang dipilih tidak valid.',
+            'foto_toko.required' => 'Foto toko wajib diunggah.',
+            'foto_toko.image' => 'Foto toko harus berupa file gambar.',
+            'foto_toko.mimes' => 'Format foto toko harus JPG, PNG, atau WebP.',
+            'foto_toko.max' => 'Ukuran foto toko maksimal 5MB.',
+            'produk.required' => 'Pilih minimal satu produk.',
+            'produk.array' => 'Daftar produk tidak valid.',
+            'produk.min' => 'Pilih minimal satu produk.',
+            'produk.*.id_produk.required' => 'Produk wajib dipilih.',
+            'produk.*.id_produk.exists' => 'Produk yang dipilih tidak valid.',
+            'produk.*.jumlah.required' => 'Jumlah produk wajib diisi.',
+            'produk.*.jumlah.integer' => 'Jumlah produk harus berupa bilangan bulat.',
+            'produk.*.jumlah.min' => 'Jumlah produk minimal 1.',
         ]);
 
         $fotoTokoPath = $request->file('foto_toko')->store('foto_toko', 'public');
 
         try {
-        DB::transaction(function () use ($data, $fotoTokoPath) {
+            DB::transaction(function () use ($data, $fotoTokoPath) {
 
-            $total = 0;
-            $detailData = [];
+                $total = 0;
+                $detailData = [];
 
-            foreach ($data['produk'] as $item) {
+                foreach ($data['produk'] as $item) {
 
-                $produk = Produk::where('id_produk', $item['id_produk'])
-                    ->where('status_produk', 'aktif')
-                    ->first();
+                    $produk = Produk::where('id_produk', $item['id_produk'])
+                        ->where('status_produk', 'aktif')
+                        ->first();
 
-                if (!$produk) {
-                    throw ValidationException::withMessages([
-                        'produk' => 'Terdapat produk yang sudah tidak aktif.'
-                    ]);
+                    if (! $produk) {
+                        throw ValidationException::withMessages([
+                            'produk' => 'Terdapat produk yang sudah tidak aktif.',
+                        ]);
+                    }
+
+                    if ($item['jumlah'] > $produk->stok_produk) {
+                        throw ValidationException::withMessages([
+                            'produk' => "Jumlah {$produk->nama_produk} melebihi stok yang tersedia.",
+                        ]);
+                    }
+
+                    $harga = $produk->harga_produk;
+                    $subtotal = $harga * $item['jumlah'];
+
+                    $total += $subtotal;
+
+                    $detailData[] = [
+                        'id_produk' => $produk->id_produk,
+                        'jumlah_produk' => $item['jumlah'],
+                        'harga_satuan' => $harga,
+                        'subtotal' => $subtotal,
+                    ];
                 }
 
-                if ($item['jumlah'] > $produk->stok_produk) {
-                    throw ValidationException::withMessages([
-                        'produk' => "Jumlah {$produk->nama_produk} melebihi stok yang tersedia."
-                    ]);
-                }
-
-                $harga = $produk->harga_produk;
-                $subtotal = $harga * $item['jumlah'];
-
-                $total += $subtotal;
-
-                $detailData[] = [
-                    'id_produk' => $produk->id_produk,
-                    'jumlah_produk' => $item['jumlah'],
-                    'harga_satuan' => $harga,
-                    'subtotal' => $subtotal,
-                ];
-            }
-
-            $penjualan = Penjualan::create([
-                'id_pelanggan' => $data['id_pelanggan'],
-                'id_user' => auth()->user()->id_user,
-                'nomor_penjualan' => 'PJ-' . now()->format('YmdHis') . '-' . random_int(100, 999),
-                'tanggal_penjualan' => now()->toDateString(),
-                'total_penjualan' => $total,
-                'status_penjualan' => OrderStatus::MENUNGGU_VALIDASI->value,
-                'foto_toko' => $fotoTokoPath,
-            ]);
-
-            foreach ($detailData as $detail) {
-
-                DetailPenjualan::create([
-                    'id_penjualan' => $penjualan->id_penjualan,
-                    'id_produk' => $detail['id_produk'],
-                    'jumlah_produk' => $detail['jumlah_produk'],
-                    'harga_satuan' => $detail['harga_satuan'],
-                    'subtotal' => $detail['subtotal'],
+                $penjualan = Penjualan::create([
+                    'id_pelanggan' => $data['id_pelanggan'],
+                    'id_user' => auth()->user()->id_user,
+                    'nomor_penjualan' => 'PJ-'.now()->format('YmdHis').'-'.random_int(100, 999),
+                    'tanggal_penjualan' => now()->toDateString(),
+                    'total_penjualan' => $total,
+                    'status_penjualan' => OrderStatus::MENUNGGU_VALIDASI->value,
+                    'foto_toko' => $fotoTokoPath,
                 ]);
-            }
-        });
+
+                foreach ($detailData as $detail) {
+
+                    DetailPenjualan::create([
+                        'id_penjualan' => $penjualan->id_penjualan,
+                        'id_produk' => $detail['id_produk'],
+                        'jumlah_produk' => $detail['jumlah_produk'],
+                        'harga_satuan' => $detail['harga_satuan'],
+                        'subtotal' => $detail['subtotal'],
+                    ]);
+                }
+            });
         } catch (\Throwable $e) {
             Storage::disk('public')->delete($fotoTokoPath);
             throw $e;
@@ -154,243 +169,263 @@ class OrderController extends Controller
     }
 
     public function show(Penjualan $order)
-{
-    abort_if(
-        $order->id_user !== auth()->user()->id_user,
-        403
-    );
+    {
+        abort_if(
+            $order->id_user !== auth()->user()->id_user,
+            403
+        );
 
-    $order->load([
-    'pelanggan',
-    'user',
-    'detailPenjualan.produk',
-]);
+        $order->load([
+            'pelanggan',
+            'user',
+            'detailPenjualan.produk',
+        ]);
 
-    return view('order.show', compact('order'));
-}
-
-public function edit(Penjualan $order)
-{
-    abort_if(
-        $order->id_user !== auth()->user()->id_user,
-        403
-    );
-
-    abort_if(
-        !$order->isMenungguValidasi(),
-        403,
-        'Order yang sudah diproses tidak dapat diubah.'
-    );
-
-    $pelanggan = Pelanggan::where('status_pelanggan', 'aktif')
-        ->orderBy('nama_pelanggan')
-        ->get();
-
-    $produk = Produk::where('status_produk', 'aktif')
-        ->where('stok_produk', '>', 0)
-        ->orderBy('nama_produk')
-        ->get();
-
-    $produkOptions = $produk->map(function ($item) {
-        return [
-            'id' => $item->id_produk,
-            'nama' => $item->nama_produk,
-            'stok' => $item->stok_produk,
-            'satuan' => $item->satuan_produk,
-            'harga' => $item->harga_produk,
-        ];
-    })->values();
-
-    $order->load('detailPenjualan');
-
-    $detailOrder = $order->detailPenjualan->map(function ($detail) {
-        return [
-            'id_produk' => $detail->id_produk,
-            'jumlah' => $detail->jumlah_produk,
-        ];
-    })->values();
-
-    return view('order.edit', compact(
-        'order',
-        'pelanggan',
-        'produk',
-        'produkOptions',
-        'detailOrder'
-    ));
-}
-
-public function update(Request $request, Penjualan $order)
-{
-    abort_if(
-        $order->id_user !== auth()->user()->id_user,
-        403
-    );
-
-    abort_if(
-        !$order->isMenungguValidasi(),
-        403,
-        'Order yang sudah diproses tidak dapat diubah.'
-    );
-
-    $data = $request->validate([
-        'id_pelanggan' => 'required|exists:pelanggan,id_pelanggan',
-        'foto_toko' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
-
-        'produk' => 'required|array|min:1',
-
-        'produk.*.id_produk' => [
-            'required',
-            'distinct',
-            'exists:produk,id_produk',
-        ],
-
-        'produk.*.jumlah' => 'required|integer|min:1',
-    ]);
-
-    $newFotoTokoPath = null;
-    $oldFotoTokoPath = $order->foto_toko;
-
-    if ($request->hasFile('foto_toko')) {
-        $newFotoTokoPath = $request->file('foto_toko')->store('foto_toko', 'public');
+        return view('order.show', compact('order'));
     }
 
-    try {
-    DB::transaction(function () use ($data, $order, $newFotoTokoPath) {
+    public function edit(Penjualan $order)
+    {
+        abort_if(
+            $order->id_user !== auth()->user()->id_user,
+            403
+        );
 
-        $total = 0;
-        $detailBaru = [];
+        abort_if(
+            ! $order->isMenungguValidasi(),
+            403,
+            'Order yang sudah diproses tidak dapat diubah.'
+        );
 
-        foreach ($data['produk'] as $item) {
+        $pelanggan = Pelanggan::where('status_pelanggan', 'aktif')
+            ->orderBy('nama_pelanggan')
+            ->get();
 
-            $produk = Produk::where(
-                'id_produk',
-                $item['id_produk']
-            )
-                ->where('status_produk', 'aktif')
-                ->first();
+        $produk = Produk::where('status_produk', 'aktif')
+            ->where('stok_produk', '>', 0)
+            ->orderBy('nama_produk')
+            ->get();
 
-            if (!$produk) {
-                throw ValidationException::withMessages([
-                    'produk' => 'Terdapat produk yang tidak aktif.'
-                ]);
-            }
-
-            if ($item['jumlah'] > $produk->stok_produk) {
-                throw ValidationException::withMessages([
-                    'produk' => "Jumlah {$produk->nama_produk} melebihi stok."
-                ]);
-            }
-
-            $subtotal =
-                $produk->harga_produk * $item['jumlah'];
-
-            $total += $subtotal;
-
-            $detailBaru[] = [
-                'id_produk' => $produk->id_produk,
-                'jumlah_produk' => $item['jumlah'],
-                'harga_satuan' => $produk->harga_produk,
-                'subtotal' => $subtotal,
+        $produkOptions = $produk->map(function ($item) {
+            return [
+                'id' => $item->id_produk,
+                'nama' => $item->nama_produk,
+                'stok' => $item->stok_produk,
+                'satuan' => $item->satuan_produk,
+                'harga' => $item->harga_produk,
             ];
+        })->values();
+
+        $order->load('detailPenjualan');
+
+        $detailOrder = $order->detailPenjualan->map(function ($detail) {
+            return [
+                'id_produk' => $detail->id_produk,
+                'jumlah' => $detail->jumlah_produk,
+            ];
+        })->values();
+
+        return view('order.edit', compact(
+            'order',
+            'pelanggan',
+            'produk',
+            'produkOptions',
+            'detailOrder'
+        ));
+    }
+
+    public function update(Request $request, Penjualan $order)
+    {
+        abort_if(
+            $order->id_user !== auth()->user()->id_user,
+            403
+        );
+
+        abort_if(
+            ! $order->isMenungguValidasi(),
+            403,
+            'Order yang sudah diproses tidak dapat diubah.'
+        );
+
+        $data = $request->validate([
+            'id_pelanggan' => 'required|exists:pelanggan,id_pelanggan',
+            'foto_toko' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+
+            'produk' => 'required|array|min:1',
+
+            'produk.*.id_produk' => [
+                'required',
+                'distinct',
+                'exists:produk,id_produk',
+            ],
+
+            'produk.*.jumlah' => 'required|integer|min:1',
+        ], [
+            'id_pelanggan.required' => 'Pilih pelanggan terlebih dahulu.',
+            'id_pelanggan.exists' => 'Pelanggan yang dipilih tidak valid.',
+            'foto_toko.image' => 'Foto toko harus berupa file gambar.',
+            'foto_toko.mimes' => 'Format foto toko harus JPG, PNG, atau WebP.',
+            'foto_toko.max' => 'Ukuran foto toko maksimal 5MB.',
+            'produk.required' => 'Pilih minimal satu produk.',
+            'produk.array' => 'Daftar produk tidak valid.',
+            'produk.min' => 'Pilih minimal satu produk.',
+            'produk.*.id_produk.required' => 'Produk wajib dipilih.',
+            'produk.*.id_produk.distinct' => 'Produk tidak boleh dipilih lebih dari satu kali.',
+            'produk.*.id_produk.exists' => 'Produk yang dipilih tidak valid.',
+            'produk.*.jumlah.required' => 'Jumlah produk wajib diisi.',
+            'produk.*.jumlah.integer' => 'Jumlah produk harus berupa bilangan bulat.',
+            'produk.*.jumlah.min' => 'Jumlah produk minimal 1.',
+        ]);
+
+        $newFotoTokoPath = null;
+        $oldFotoTokoPath = $order->foto_toko;
+
+        if ($request->hasFile('foto_toko')) {
+            $newFotoTokoPath = $request->file('foto_toko')->store('foto_toko', 'public');
         }
 
-        $updateData = [
-            'id_pelanggan' => $data['id_pelanggan'],
-            'total_penjualan' => $total,
-        ];
+        try {
+            DB::transaction(function () use ($data, $order, $newFotoTokoPath) {
 
-        if ($newFotoTokoPath !== null) {
-            $updateData['foto_toko'] = $newFotoTokoPath;
+                $total = 0;
+                $detailBaru = [];
+
+                foreach ($data['produk'] as $item) {
+
+                    $produk = Produk::where(
+                        'id_produk',
+                        $item['id_produk']
+                    )
+                        ->where('status_produk', 'aktif')
+                        ->first();
+
+                    if (! $produk) {
+                        throw ValidationException::withMessages([
+                            'produk' => 'Terdapat produk yang tidak aktif.',
+                        ]);
+                    }
+
+                    if ($item['jumlah'] > $produk->stok_produk) {
+                        throw ValidationException::withMessages([
+                            'produk' => "Jumlah {$produk->nama_produk} melebihi stok.",
+                        ]);
+                    }
+
+                    $subtotal =
+                        $produk->harga_produk * $item['jumlah'];
+
+                    $total += $subtotal;
+
+                    $detailBaru[] = [
+                        'id_produk' => $produk->id_produk,
+                        'jumlah_produk' => $item['jumlah'],
+                        'harga_satuan' => $produk->harga_produk,
+                        'subtotal' => $subtotal,
+                    ];
+                }
+
+                $updateData = [
+                    'id_pelanggan' => $data['id_pelanggan'],
+                    'total_penjualan' => $total,
+                ];
+
+                if ($newFotoTokoPath !== null) {
+                    $updateData['foto_toko'] = $newFotoTokoPath;
+                }
+
+                $order->update($updateData);
+
+                DetailPenjualan::where(
+                    'id_penjualan',
+                    $order->id_penjualan
+                )->delete();
+
+                foreach ($detailBaru as $detail) {
+
+                    DetailPenjualan::create([
+                        'id_penjualan' => $order->id_penjualan,
+                        'id_produk' => $detail['id_produk'],
+                        'jumlah_produk' => $detail['jumlah_produk'],
+                        'harga_satuan' => $detail['harga_satuan'],
+                        'subtotal' => $detail['subtotal'],
+                    ]);
+                }
+            });
+
+            if ($newFotoTokoPath !== null && $oldFotoTokoPath) {
+                Storage::disk('public')->delete($oldFotoTokoPath);
+            }
+        } catch (\Throwable $e) {
+            if ($newFotoTokoPath !== null) {
+                Storage::disk('public')->delete($newFotoTokoPath);
+            }
+            throw $e;
         }
 
-        $order->update($updateData);
+        return redirect()
+            ->route('order.index')
+            ->with('success', 'Order berhasil diubah.');
+    }
 
-        DetailPenjualan::where(
-            'id_penjualan',
-            $order->id_penjualan
-        )->delete();
+    public function uploadBukti(Request $request, Penjualan $order)
+    {
+        abort_if(
+            $order->id_user !== auth()->user()->id_user,
+            403
+        );
 
-        foreach ($detailBaru as $detail) {
-
-            DetailPenjualan::create([
-                'id_penjualan' => $order->id_penjualan,
-                'id_produk' => $detail['id_produk'],
-                'jumlah_produk' => $detail['jumlah_produk'],
-                'harga_satuan' => $detail['harga_satuan'],
-                'subtotal' => $detail['subtotal'],
+        if (! $order->isDikirim()) {
+            throw ValidationException::withMessages([
+                'order' => 'Bukti penyerahan hanya dapat diunggah saat order berstatus dikirim.',
             ]);
         }
-    });
 
-    if ($newFotoTokoPath !== null && $oldFotoTokoPath) {
-        Storage::disk('public')->delete($oldFotoTokoPath);
+        $request->validate([
+            'foto_bukti_penyerahan' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
+        ], [
+            'foto_bukti_penyerahan.required' => 'Foto bukti penyerahan wajib diunggah.',
+            'foto_bukti_penyerahan.image' => 'Foto bukti penyerahan harus berupa file gambar.',
+            'foto_bukti_penyerahan.mimes' => 'Format foto bukti penyerahan harus JPG, PNG, atau WebP.',
+            'foto_bukti_penyerahan.max' => 'Ukuran foto bukti penyerahan maksimal 5MB.',
+        ]);
+
+        $path = $request->file('foto_bukti_penyerahan')->store('bukti_penyerahan', 'public');
+
+        $order->update([
+            'foto_bukti_penyerahan' => $path,
+        ]);
+
+        return redirect()
+            ->route('order.show', $order)
+            ->with('success', 'Foto bukti penyerahan berhasil diunggah.');
     }
-    } catch (\Throwable $e) {
-        if ($newFotoTokoPath !== null) {
-            Storage::disk('public')->delete($newFotoTokoPath);
+
+    public function selesai(Penjualan $order)
+    {
+        abort_if(
+            $order->id_user !== auth()->user()->id_user,
+            403
+        );
+
+        if (! $order->canTransitionTo(OrderStatus::SELESAI)) {
+            throw ValidationException::withMessages([
+                'order' => 'Order tidak dapat diselesaikan pada status saat ini.',
+            ]);
         }
-        throw $e;
-    }
 
-    return redirect()
-        ->route('order.index')
-        ->with('success', 'Order berhasil diubah.');
-}
+        if (empty($order->foto_bukti_penyerahan)) {
+            throw ValidationException::withMessages([
+                'foto_bukti_penyerahan' => 'Order tidak dapat diselesaikan karena bukti penyerahan belum diunggah.',
+            ]);
+        }
 
-public function uploadBukti(Request $request, Penjualan $order)
-{
-    abort_if(
-        $order->id_user !== auth()->user()->id_user,
-        403
-    );
-
-    if (!$order->isDikirim()) {
-        throw ValidationException::withMessages([
-            'order' => 'Bukti penyerahan hanya dapat diunggah saat order berstatus dikirim.'
+        $order->update([
+            'status_penjualan' => OrderStatus::SELESAI->value,
+            'tanggal_selesai' => now()->toDateString(),
         ]);
+
+        return redirect()
+            ->route('order.show', $order)
+            ->with('success', 'Order berhasil diselesaikan.');
     }
-
-    $request->validate([
-        'foto_bukti_penyerahan' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
-    ]);
-
-    $path = $request->file('foto_bukti_penyerahan')->store('bukti_penyerahan', 'public');
-
-    $order->update([
-        'foto_bukti_penyerahan' => $path,
-    ]);
-
-    return redirect()
-        ->route('order.show', $order)
-        ->with('success', 'Foto bukti penyerahan berhasil diunggah.');
-}
-
-public function selesai(Penjualan $order)
-{
-    abort_if(
-        $order->id_user !== auth()->user()->id_user,
-        403
-    );
-
-    if (!$order->canTransitionTo(OrderStatus::SELESAI)) {
-        throw ValidationException::withMessages([
-            'order' => 'Order tidak dapat diselesaikan pada status saat ini.'
-        ]);
-    }
-
-    if (empty($order->foto_bukti_penyerahan)) {
-        throw ValidationException::withMessages([
-            'foto_bukti_penyerahan' => 'Order tidak dapat diselesaikan karena bukti penyerahan belum diunggah.'
-        ]);
-    }
-
-    $order->update([
-        'status_penjualan' => OrderStatus::SELESAI->value,
-        'tanggal_selesai' => now()->toDateString(),
-    ]);
-
-    return redirect()
-        ->route('order.show', $order)
-        ->with('success', 'Order berhasil diselesaikan.');
-}
 }

@@ -37,7 +37,7 @@
                 @csrf
                 <x-ui.input type="file" name="foto_bukti_penyerahan" label="Foto Bukti Penyerahan" hint="Format JPG, PNG, atau WebP (maksimal 5MB)." accept="image/jpeg,image/png,image/webp" required />
                 <div class="page-actions">
-                    <x-ui.button type="submit" variant="secondary">
+                    <x-ui.button type="submit" variant="primary">
                         <x-ui.icon name="check" /> {{ $order->foto_bukti_penyerahan ? 'Perbarui Bukti Penyerahan' : 'Simpan Bukti Penyerahan' }}
                     </x-ui.button>
                 </div>
